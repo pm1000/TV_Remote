@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="88dp"
+android:background="@color/light"
+android:minHeight="88dp">
+
+
+<RelativeLayout
+
+    android:id="@+id/channelTextView"
+    android:layout_width="match_parent"
+    android:layout_height="88dp"
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentRight="true"
+    android:layout_alignParentTop="true"
+    android:paddingLeft="16dp">
+
+
+    <TextView
+
+        android:id="@+id/channel_name"
+        android:layout_width="match_parent"
+        android:layout_height="66dp"
+        android:layout_weight="1"
+        android:gravity="bottom"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        tools:text="ARD" />
+
+    <ImageView
+
+        android:id="@+id/favorite_image"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="16dp"
+        android:src="@drawable/star_not_favorite"/>
+
+</RelativeLayout>
+
+</RelativeLayout>
