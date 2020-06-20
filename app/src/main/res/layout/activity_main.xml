@@ -134,6 +134,5 @@
         app:layout_constraintLeft_toRightOf="@id/btn_volume_mute"
         app:layout_constraintStart_toEndOf="@+id/btn_volume_mute"
         app:layout_constraintTop_toTopOf="@+id/guideline2" />
-    //Analog zu activity main
 
 </androidx.constraintlayout.widget.ConstraintLayout>

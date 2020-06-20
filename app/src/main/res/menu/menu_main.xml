@@ -3,33 +3,32 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/button_activate"
-        android:icon="@drawable/star_favorite"
+        android:icon="@drawable/icon_power_1k"
         android:layout_alignParentLeft="true"
         app:showAsAction="always|withText"
-        android:title="Ein/Aus">
+        android:title="@string/menu_on_off_title">
     </item>
     <item
         android:id="@+id/button_picInPic"
-        android:icon="@drawable/star_favorite"
+        android:icon="@drawable/icon_pip_1k"
         app:showAsAction="always|withText"
-        android:title="Pic-in-Pic">
+        android:title="@string/menu_pip_title">
     </item>
     <item
         android:id="@+id/button_homeScreen"
-        android:icon="@drawable/star_favorite"
-        app:showAsAction="always|withText"
-        android:title="Übersicht">
-    </item>
+        android:icon="@drawable/icon_home_1k"
+        android:title="@string/menu_home_title"
+        app:showAsAction="always|withText"></item>
     <item
         android:id="@+id/button_favorites"
-        android:icon="@drawable/star_favorite"
+        android:icon="@drawable/icon_fav_1k"
         app:showAsAction="always|withText"
-        android:title="Favoriten">
+        android:title="@string/menu_fav_title">
     </item>
     <item
         android:id="@+id/button_settings"
-        android:icon="@drawable/star_favorite"
+        android:icon="@drawable/icon_settings_1k"
         app:showAsAction="always|withText"
-        android:title="Einstellungen">
+        android:title="@string/menu_Settings_title">
     </item>
 </menu>

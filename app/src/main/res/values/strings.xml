@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Fernbedienung</string>
+    <string name="menu_on_off_title">Ein/Aus</string>
+    <string name="menu_pip_title">Pic-in-Pic</string>
+    <string name="menu_home_title">Übersicht</string>
+    <string name="menu_fav_title">Favoriten</string>
+    <string name="menu_Settings_title">Einstellungen</string>
 </resources>
