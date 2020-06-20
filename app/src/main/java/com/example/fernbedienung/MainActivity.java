@@ -1,8 +1,10 @@
 package com.example.fernbedienung;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -56,54 +58,38 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        // Set event handler
-        menu.findItem(R.id.button_activate).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                return changePage(item);
-            }
-        });
-        menu.findItem(R.id.button_favorites).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                return changePage(item);
-            }
-        });
-        menu.findItem(R.id.button_homeScreen).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                return changePage(item);
-            }
-        });
-        menu.findItem(R.id.button_picInPic).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                return changePage(item);
-            }
-        });
-        menu.findItem(R.id.button_settings).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                return changePage(item);
-            }
-        });
         return true;
     }
-    private boolean changePage(MenuItem item) {
-        if (item.getTitle().toString().equals(getResources().getString(R.string.menu_Settings_title))) {
-            setContentView(R.layout.activity_settings);
-        } else if (item.getTitle().toString().equals(getResources().getString(R.string.menu_fav_title))) {
-            setContentView(R.layout.activity_favorite);
-        } else if (item.getTitle().toString().equals(getResources().getString(R.string.menu_home_title))) {
-            setContentView(R.layout.activity_main);
-        } else if (item.getTitle().toString().equals(getResources().getString(R.string.menu_pip_title))) {
-            setContentView(R.layout.activity_picinpic);
-        } else if (item.getTitle().toString().equals(getResources().getString(R.string.menu_on_off_title))) {
-            //Send switch off signal
 
-        } else {
-            return false;
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        Intent changeIntent;
+        switch (item.getItemId()) {
+            case R.id.button_activate:
+                //Send switch off signal
+                return true;
+            case R.id.button_picInPic:
+                //Change to activity_picinpic
+                changeIntent = new Intent(this, PicInPicActivity.class);
+                startActivity(changeIntent);
+                return true;
+            case R.id.button_homeScreen:
+                //Change to activity_main
+                changeIntent = new Intent(this, MainActivity.class);
+                startActivity(changeIntent);
+                return true;
+            case R.id.button_favorites:
+                //Change to activity_favorite
+                changeIntent = new Intent(this, FavoriteActivity.class);
+                startActivity(changeIntent);
+                return true;
+            case R.id.button_settings:
+                //Change to activity_settings
+                changeIntent = new Intent(this, SettingsActivity.class);
+                startActivity(changeIntent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return true;
     }
 }

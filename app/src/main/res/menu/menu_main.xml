@@ -18,7 +18,8 @@
         android:id="@+id/button_homeScreen"
         android:icon="@drawable/icon_home_1k"
         android:title="@string/menu_home_title"
-        app:showAsAction="always|withText"></item>
+        app:showAsAction="always|withText">
+    </item>
     <item
         android:id="@+id/button_favorites"
         android:icon="@drawable/icon_fav_1k"
