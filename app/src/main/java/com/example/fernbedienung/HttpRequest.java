@@ -15,7 +15,7 @@
  * @version     1.3, 2015-12-03
  */
 
-package de.h_da.fbi.kreling.tvremotecontrol2;
+package com.example.fernbedienung;
 
 import android.os.NetworkOnMainThreadException;
 import android.os.StrictMode;
