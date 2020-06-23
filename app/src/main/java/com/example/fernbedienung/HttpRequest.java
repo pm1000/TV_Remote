@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 package com.example.fernbedienung;
 
-=======
->>>>>>> f5178d1bcbecb833766f7ca1da6a101dc331413c
 /**
  * This class encapsulates the communication with the TV Simulator via HTTP protocol.
  * Its methods can be called for the first step directly from the user interface thread.
@@ -20,12 +17,7 @@ package com.example.fernbedienung;
  * @version     1.3, 2015-12-03
  */
 
-<<<<<<< HEAD
 import android.os.AsyncTask;
-=======
-package com.example.fernbedienung;
-
->>>>>>> f5178d1bcbecb833766f7ca1da6a101dc331413c
 import android.os.NetworkOnMainThreadException;
 import android.os.StrictMode;
 import org.json.JSONException;
@@ -37,12 +29,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-<<<<<<< HEAD
 //extends AsyncTask<String, Void, JSONObject>
 public class HttpRequest{
-=======
-public class HttpRequest {
->>>>>>> f5178d1bcbecb833766f7ca1da6a101dc331413c
 
     protected String ipAddress;
     protected int timeoutMillis;
@@ -158,8 +146,6 @@ public class HttpRequest {
             throw new IOException("TV returns status=" + httpStatus);
         return httpResponse;
     }
-<<<<<<< HEAD
-
     /*@Override
     protected JSONObject doInBackground(String... strings) {
         try {
@@ -171,6 +157,4 @@ public class HttpRequest {
         }
         return null;
     }*/
-=======
->>>>>>> f5178d1bcbecb833766f7ca1da6a101dc331413c
 }
