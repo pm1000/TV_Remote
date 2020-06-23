@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
+                fillChannelList(msg);
             }
         };
 
@@ -75,6 +76,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public void fillChannelList(Message msg) {
+        msg.getData().getString(HANDLER_MESSAGE_KEY);
+    }
     public void startTV_Server() throws IOException, JSONException {
         //tv = new HttpRequest("192.168.173.1", 1000);
 
@@ -91,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
 
     }
 
