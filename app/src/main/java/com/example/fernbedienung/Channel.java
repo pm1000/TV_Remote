@@ -2,14 +2,21 @@ package com.example.fernbedienung;
 
 public class Channel {
 
-    private String name;
+    private int frequency;
+    private String channel;
+    private int quality;
+    private String program;
+    private String provider;
+
     private boolean favorite = false;
 
     public Channel(String name) {
-        this.name = name;
+        this.program = name;
     }
+
     public String getName() {
-        return name;
+
+        return program;
     }
     public void setFavorite(boolean favorite) {
         this.favorite = favorite;
