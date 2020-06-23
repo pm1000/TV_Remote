@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.tv = new HttpRequest("192.168.173.1",500, false);
         setContentView(R.layout.activity_main);
 
         try {
