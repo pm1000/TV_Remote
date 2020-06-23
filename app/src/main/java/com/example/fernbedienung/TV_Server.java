@@ -29,16 +29,26 @@ public class TV_Server extends AsyncTask<String, Integer, JSONObject> {
     private HttpRequest request;
     private boolean running;
     private Handler handler;
+    private static TV_Server Instance =null;
 
-    public TV_Server(HttpRequest request, Context context, Handler handler) {
-        this.request = request;
+    private TV_Server(Context context, Handler handler) {
+        this.request = new HttpRequest("192.168.173.1", 1000);;
         this.context = context;
         this.handler = handler;
     }
 
+    public static TV_Server getInstance() {
+        if(TV_Server.Instance == null) {
+            TV_Server.Instance = new TV_Server(null, null);
+        }
+        return TV_Server.Instance;
+    }
 
     public void setHandler(Handler handler) {
         this.handler = handler;
+    }
+    public void setContext(Context context) {
+        this.context = context;
     }
 
 

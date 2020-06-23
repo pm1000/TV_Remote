@@ -28,15 +28,26 @@ import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
     public static final String MESSAGE_KEY = "";
-    private HttpRequest tv;
+    private TV_Server tv;
     private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.tv = new HttpRequest("192.168.173.1",500, false);
+        //INIT TV-Server
+        this.handler = new Handler(getMainLooper()) {
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                super.handleMessage(msg);
+            }
+        };
+        this.tv = TV_Server.getInstance();
+        this.tv.setHandler(handler);
+        this.tv.setContext(getApplicationContext());
+        //TV-server initialialized
+        //Setting up content view
         setContentView(R.layout.activity_main);
-
+        //Get the ChannelList
         try {
             startTV_Server();
         } catch (IOException e) {
@@ -73,24 +84,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startTV_Server() throws IOException, JSONException {
-        tv = new HttpRequest("192.168.178.61", 1000);
-
-
-
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                try {
-                    JSONObject response = tv.execute("scanChannels");
-                    Log.i("TMP", response.toString());
-
-
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                JSONObject response = tv.doInBackground(new String[] {"scanChannels"});
+                Log.i("TMP", response.toString());
             }
         });
 
