@@ -8,18 +8,13 @@ public class Channel {
     public Channel(String name) {
         this.name = name;
     }
-
     public String getName() {
-
         return name;
     }
-
     public void setFavorite(boolean favorite) {
         this.favorite = favorite;
     }
-
     public boolean getFavorite() {
-
         return favorite;
     }
 

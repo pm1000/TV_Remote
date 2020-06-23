@@ -23,6 +23,7 @@ import java.util.ArrayList;
 
 import androidx.appcompat.widget.Toolbar;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String MESSAGE_KEY = "";
     private TV_Server tv;
     private Handler handler;
+    private ArrayList<Channel> channels;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +41,24 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
+                //evaluate msg
+                try {
+                    //get correct JSON Object
+                    JSONObject full_obj = new JSONObject(msg.getData().getString(MainActivity.MESSAGE_KEY));
+                    if(full_obj.has("channels")) {
+                        //if channels do exist, evaluate them
+                        JSONArray channellist = full_obj.getJSONArray("channels");
+                        for(int i = 0; i<channellist.length(); i++) {
+                            JSONObject element = channellist.getJSONObject(i);
+                            //create single channel
+                            channels.add(new Channel(element.getString("program")));
+                            channels.get(channels.size()-1);
+                        }
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         };
         this.tv = TV_Server.getInstance();
@@ -47,14 +67,7 @@ public class MainActivity extends AppCompatActivity {
         //TV-server initialialized
         //Setting up content view
         setContentView(R.layout.activity_main);
-        //Get the ChannelList
-        try {
-            startTV_Server();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+
         // Find the toolbar view inside the activity layout
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("tvNOW");
@@ -63,6 +76,19 @@ public class MainActivity extends AppCompatActivity {
         // Sets the Toolbar to act as the ActionBar for this Activity window.
         // Make sure the toolbar exists in the activity and is not null
         setSupportActionBar(toolbar);
+
+        //Get the ChannelList
+        try {
+            startTV_Server();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //Bundle msg = this.handler.obtainMessage().;
+        //Log.i("TMP",msg.getString("channels"));
+
 
         final ArrayList<Channel> channels = new ArrayList<>();
         channels.add(new Channel("ZDF"));
@@ -91,14 +117,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("TMP", response.toString());
             }
         });
-
-
     }
-
-    public void setHandler(Handler hand){
-        this.handler = hand;
-    }
-
     // Menu icons are inflated just as they were with actionbar
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -113,6 +132,12 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.button_activate:
                 //Send switch off signal
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        JSONObject response = tv.doInBackground(new String[] {"standby=1"});
+                    }
+                });
                 return true;
             case R.id.button_picInPic:
                 //Change to activity_picinpic

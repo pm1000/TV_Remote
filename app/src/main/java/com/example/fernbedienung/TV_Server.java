@@ -21,7 +21,7 @@ import java.io.IOException;
  * Created by zander on 14.06.17.
  */
 
-public class TV_Server extends AsyncTask<String, Integer, JSONObject> {
+public class TV_Server extends AsyncTask<String, Void, JSONObject> {
 
     public static final String TAG = "ScanChannelsTask";
 
