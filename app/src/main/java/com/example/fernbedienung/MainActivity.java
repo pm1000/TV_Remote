@@ -33,8 +33,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.tv = new HttpRequest("192.168.173.1",500, false);
+        this.tv = new HttpRequest("192.168.173.1",1000);//, false);
         setContentView(R.layout.activity_main);
+
+        this.handler = new Handler(getMainLooper()) {
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                super.handleMessage(msg);
+            }
+        };
 
         try {
             startTV_Server();
@@ -53,11 +60,8 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         final ArrayList<Channel> channels = new ArrayList<>();
-        channels.add(new Channel("ZDF"));
-        channels.add(new Channel("ARD"));
-        channels.add(new Channel("RTL"));
-        channels.add(new Channel("NDR"));
-        channels.add(new Channel("BAYERN 3"));
+        channels.add(new Channel("Lade Kanäle..."));
+
         ChannelAdapter adapter = new ChannelAdapter(this, channels, R.color.light);
 
         final ListView listView = (ListView) findViewById(R.id.channel_list);
@@ -72,9 +76,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startTV_Server() throws IOException, JSONException {
-        tv = new HttpRequest("192.168.178.61", 1000);
-
-
+        //tv = new HttpRequest("192.168.173.1", 1000);
 
         AsyncTask.execute(new Runnable() {
             @Override
@@ -82,9 +84,6 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     JSONObject response = tv.execute("scanChannels");
                     Log.i("TMP", response.toString());
-
-
-
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (JSONException e) {
@@ -114,6 +113,18 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.button_activate:
                 //Send switch off signal
+                    AsyncTask.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                JSONObject result = tv.execute("standby=0");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
                 return true;
             case R.id.button_picInPic:
                 //Change to activity_picinpic
