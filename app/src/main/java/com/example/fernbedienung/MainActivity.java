@@ -9,6 +9,8 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +28,7 @@ import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
     private HttpRequest tv;
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,12 +73,17 @@ public class MainActivity extends AppCompatActivity {
     public void startTV_Server() throws IOException, JSONException {
         tv = new HttpRequest("192.168.178.61", 1000);
 
+
+
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
                 try {
                     JSONObject response = tv.execute("scanChannels");
                     Log.i("TMP", response.toString());
+
+
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (JSONException e) {
@@ -85,6 +93,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    public void setHandler(Handler hand){
+        this.handler = hand;
     }
 
     // Menu icons are inflated just as they were with actionbar
