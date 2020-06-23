@@ -1,3 +1,5 @@
+package com.example.fernbedienung;
+
 /**
  * This class encapsulates the communication with the TV Simulator via HTTP protocol.
  * Its methods can be called for the first step directly from the user interface thread.
@@ -15,8 +17,7 @@
  * @version     1.3, 2015-12-03
  */
 
-package com.example.fernbedienung;
-
+import android.os.AsyncTask;
 import android.os.NetworkOnMainThreadException;
 import android.os.StrictMode;
 import org.json.JSONException;
@@ -145,5 +146,15 @@ public class HttpRequest{
             throw new IOException("TV returns status=" + httpStatus);
         return httpResponse;
     }
-
+    /*@Override
+    protected JSONObject doInBackground(String... strings) {
+        try {
+            return execute(strings[0]);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }*/
 }
