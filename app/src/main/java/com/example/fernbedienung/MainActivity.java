@@ -27,6 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
+    public static final String MESSAGE_KEY = "";
     private HttpRequest tv;
     private Handler handler;
 
