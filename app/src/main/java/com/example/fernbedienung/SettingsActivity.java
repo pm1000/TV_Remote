@@ -1,7 +1,10 @@
 package com.example.fernbedienung;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -9,12 +12,25 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import org.json.JSONObject;
+
 public class SettingsActivity  extends AppCompatActivity {
-
-
+    private TV_Server tv;
+    private Handler handler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //INIT TV-Server
+        this.handler = new Handler(getMainLooper()) {
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                super.handleMessage(msg);
+            }
+        };
+        this.tv = TV_Server.getInstance();
+        this.tv.setHandler(handler);
+        this.tv.setContext(getApplicationContext());
+        //TV-server initialialized
         setContentView(R.layout.activity_settings);
 
         // Find the toolbar view inside the activity layout
@@ -39,6 +55,12 @@ public class SettingsActivity  extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.button_activate:
                 //Send switch off signal
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        JSONObject response = tv.doInBackground(new String[] {"standby=1"});
+                    }
+                });
                 return true;
             case R.id.button_picInPic:
                 //Change to activity_picinpic

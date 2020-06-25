@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,10 +21,22 @@ import java.util.ArrayList;
 import androidx.appcompat.widget.Toolbar;
 
 public class FavoriteActivity extends AppCompatActivity {
-
+    private TV_Server tv;
+    private Handler handler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //INIT TV-Server
+        this.handler = new Handler(getMainLooper()) {
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                super.handleMessage(msg);
+            }
+        };
+        this.tv = TV_Server.getInstance();
+        this.tv.setHandler(handler);
+        this.tv.setContext(getApplicationContext());
+        //TV-server initialialized
         setContentView(R.layout.activity_favorite);
 
         // Find the toolbar view inside the activity layout

@@ -2,6 +2,8 @@ package com.example.fernbedienung;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -10,10 +12,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 public class PicInPicActivity  extends AppCompatActivity {
-
+    private TV_Server tv;
+    private Handler handler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //INIT TV-Server
+        this.handler = new Handler(getMainLooper()) {
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                super.handleMessage(msg);
+            }
+        };
+        this.tv = TV_Server.getInstance();
+        this.tv.setHandler(handler);
+        this.tv.setContext(getApplicationContext());
+        //TV-server initialialized
         setContentView(R.layout.activity_picinpic);
 
         // Find the toolbar view inside the activity layout

@@ -58,4 +58,7 @@ public class ChannelAdapter extends ArrayAdapter<Channel>  {
 
         return listItemView;
     }
+    public void updateChannels(ArrayList<Channel> channels) {
+
+    }
 }
