@@ -12,12 +12,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.SeekBar;
 
 import java.io.Console;
 import java.io.IOException;
@@ -36,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Channel> channels;
     private long time = 0;
     private int volume = 0; //muss später durch persistente daten angepasst werden
+    private boolean muted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,11 +160,20 @@ public class MainActivity extends AppCompatActivity {
         muteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TV_Server tv = new TV_Server(getApplicationContext(), handler);
-                String[] command = new String[1];
-                command[0] = "volume=0";
-                tv.execute(command);
-                MainActivity.this.setVolume(0);
+                if (MainActivity.this.muted) {
+                    TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                    String[] command = new String[1];
+                    command[0] = "volume=" + MainActivity.this.getVolume();
+                    tv.execute(command);
+                    MainActivity.this.muted = false;
+                }else
+                {
+                    TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                    String[] command = new String[1];
+                    command[0] = "volume=0";
+                    tv.execute(command);
+                    MainActivity.this.muted = true;
+                }
             }
         });
 
@@ -190,6 +202,31 @@ public class MainActivity extends AppCompatActivity {
                 command[0] = "volume=" + newVolume ;
                 tv.execute(command);
                 MainActivity.this.setVolume(newVolume);
+            }
+        });
+
+        //volume bar
+        SeekBar volSeekBar = (SeekBar) findViewById(R.id.volumeSeekBar);
+        volSeekBar.setMax(100);
+        volSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                String[] command = new String[1];
+                int newVolume = seekBar.getScrollX();
+                command[0] = "volume=" + progress;
+                tv.execute(command);
+                MainActivity.this.setVolume(newVolume);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
             }
         });
     }
