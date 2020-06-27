@@ -27,7 +27,7 @@ public class SettingsActivity  extends AppCompatActivity {
                 super.handleMessage(msg);
             }
         };
-        this.tv = TV_Server.getInstance();
+        this.tv = new TV_Server(getApplicationContext(), handler);
         this.tv.setHandler(handler);
         this.tv.setContext(getApplicationContext());
         //TV-server initialialized

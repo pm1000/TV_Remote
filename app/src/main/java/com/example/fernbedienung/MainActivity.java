@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        this.tv = TV_Server.getInstance();
+        this.tv = new TV_Server(getApplicationContext(), handler);
         this.tv.setHandler(handler);
         this.tv.setContext(getApplicationContext());
 
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         upBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TV_Server tv = TV_Server.getInstance();
+                TV_Server tv = new TV_Server(getApplicationContext(), handler);
                 //methode für nächsten channel auswählen benötigt
                 String[] command = new String[1];
                 command[0] ="channelMain="; //+ nummer
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         downBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TV_Server tv = TV_Server.getInstance();
+                TV_Server tv = new TV_Server(getApplicationContext(), handler);
                 //methode für nächsten channel auswählen benötigt
                 String[] command = new String[1];
                 command[0] ="channelMain="; //- nummer
@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                TV_Server tv = TV_Server.getInstance();
+                TV_Server tv = new TV_Server(getApplicationContext(), handler);
                 String[] command = new String[1];
                 command[0] = "timeShiftPause=";
                 tv.execute(command);
@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         muteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TV_Server tv = TV_Server.getInstance();
+                TV_Server tv = new TV_Server(getApplicationContext(), handler);
                 String[] command = new String[1];
                 command[0] = "volume=0";
                 tv.execute(command);
@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
         upVolButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TV_Server tv = TV_Server.getInstance();
+                TV_Server tv = new TV_Server(getApplicationContext(), handler);
                 String[] command = new String[1];
                 int newVolume = MainActivity.this.getVolume() + 1;
                 command[0] = "volume=" + newVolume ;
@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
         downVolButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TV_Server tv = TV_Server.getInstance();
+                TV_Server tv = new TV_Server(getApplicationContext(), handler);
                 String[] command = new String[1];
                 int newVolume = MainActivity.this.getVolume() - 1;
                 command[0] = "volume=" + newVolume ;
