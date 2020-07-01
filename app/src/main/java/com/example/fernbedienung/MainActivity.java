@@ -184,7 +184,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 TV_Server tv = new TV_Server(getApplicationContext(), handler);
                 String[] command = new String[1];
-                int newVolume = MainActivity.this.getVolume() + 1;
+                int newVolume;
+                if (MainActivity.this.getVolume() <=100){
+                    newVolume = MainActivity.this.getVolume() + 1;
+                }else
+                    newVolume = 100;
                 command[0] = "volume=" + newVolume ;
                 tv.execute(command);
                 MainActivity.this.setVolume(newVolume);
@@ -193,17 +197,23 @@ public class MainActivity extends AppCompatActivity {
 
         //volume down
         Button downVolButton = (Button) findViewById(R.id.btn_volume_down);
-        downVolButton.setOnClickListener(new View.OnClickListener() {
+        downVolButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 TV_Server tv = new TV_Server(getApplicationContext(), handler);
                 String[] command = new String[1];
-                int newVolume = MainActivity.this.getVolume() - 1;
+                int newVolume;
+                if (MainActivity.this.getVolume() >= 0){
+                    newVolume = MainActivity.this.getVolume() - 1;
+                }else
+                    newVolume = 0;
                 command[0] = "volume=" + newVolume ;
                 tv.execute(command);
                 MainActivity.this.setVolume(newVolume);
             }
         });
+
+
 
         //volume bar
         SeekBar volSeekBar = (SeekBar) findViewById(R.id.volumeSeekBar);
