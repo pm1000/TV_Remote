@@ -155,78 +155,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //mute
-        Button muteBtn = (Button) findViewById(R.id.btn_volume_mute);
-        muteBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (MainActivity.this.muted) {
-                    TV_Server tv = new TV_Server(getApplicationContext(), handler);
-                    String[] command = new String[1];
-                    command[0] = "volume=" + MainActivity.this.getVolume();
-                    tv.execute(command);
-                    MainActivity.this.muted = false;
-                }else
-                {
-                    TV_Server tv = new TV_Server(getApplicationContext(), handler);
-                    String[] command = new String[1];
-                    command[0] = "volume=0";
-                    tv.execute(command);
-                    MainActivity.this.muted = true;
-                }
-            }
-        });
-
-        //volume up
-        Button upVolButton = (Button) findViewById(R.id.btn_volume_up);
-        upVolButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TV_Server tv = new TV_Server(getApplicationContext(), handler);
-                String[] command = new String[1];
-                int newVolume;
-                if (MainActivity.this.getVolume() <=100){
-                    newVolume = MainActivity.this.getVolume() + 1;
-                }else
-                    newVolume = 100;
-                command[0] = "volume=" + newVolume ;
-                tv.execute(command);
-                MainActivity.this.setVolume(newVolume);
-            }
-        });
-
-        //volume down
-        Button downVolButton = (Button) findViewById(R.id.btn_volume_down);
-        downVolButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                TV_Server tv = new TV_Server(getApplicationContext(), handler);
-                String[] command = new String[1];
-                int newVolume;
-                if (MainActivity.this.getVolume() >= 0){
-                    newVolume = MainActivity.this.getVolume() - 1;
-                }else
-                    newVolume = 0;
-                command[0] = "volume=" + newVolume ;
-                tv.execute(command);
-                MainActivity.this.setVolume(newVolume);
-            }
-        });
-
-
-
         //volume bar
-        SeekBar volSeekBar = (SeekBar) findViewById(R.id.volumeSeekBar);
+        final SeekBar volSeekBar = (SeekBar) findViewById(R.id.volumeSeekBar);
         volSeekBar.setMax(100);
         volSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                TV_Server tv = new TV_Server(getApplicationContext(), handler);
-                String[] command = new String[1];
-                int newVolume = seekBar.getScrollX();
-                command[0] = "volume=" + progress;
-                tv.execute(command);
-                MainActivity.this.setVolume(newVolume);
+                if (fromUser) {
+                    TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                    String[] command = new String[1];
+                    command[0] = "volume=" + progress;
+                    tv.execute(command);
+                    MainActivity.this.setVolume(progress);
+                }
             }
 
             @Override
@@ -239,6 +180,70 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        //volume up
+        Button upVolButton = (Button) findViewById(R.id.btn_volume_up);
+        upVolButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                String[] command = new String[1];
+                int newVolume;
+                if (MainActivity.this.getVolume() < 100){
+                    newVolume = MainActivity.this.getVolume() + 1;
+                }else
+                    newVolume = 100;
+                command[0] = "volume=" + newVolume ;
+                tv.execute(command);
+                MainActivity.this.setVolume(newVolume);
+                volSeekBar.setProgress(newVolume);
+            }
+        });
+
+        //volume down
+        Button downVolButton = (Button) findViewById(R.id.btn_volume_down);
+        downVolButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                String[] command = new String[1];
+                int newVolume;
+                if (MainActivity.this.getVolume() > 0){
+                    newVolume = MainActivity.this.getVolume() - 1;
+                }else
+                    newVolume = 0;
+                command[0] = "volume=" + newVolume ;
+                tv.execute(command);
+                MainActivity.this.setVolume(newVolume);
+                volSeekBar.setProgress(newVolume);
+            }
+        });
+
+        //mute
+        Button muteBtn = (Button) findViewById(R.id.btn_volume_mute);
+        muteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (MainActivity.this.getMuted()) {
+                    TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                    String[] command = new String[1];
+                    command[0] = "volume=" + MainActivity.this.getVolume();
+                    tv.execute(command);
+                    MainActivity.this.setMuted(false);
+                    volSeekBar.setProgress(MainActivity.this.getVolume());
+                }else
+                {
+                    TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                    String[] command = new String[1];
+                    command[0] = "volume=0";
+                    tv.execute(command);
+                    MainActivity.this.setMuted(true);
+                    volSeekBar.setProgress(0);
+                }
+            }
+        });
+
+
     }
 
     public void startTV_Server() throws IOException, JSONException {
@@ -302,10 +307,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public int getVolume() {
-        return volume;
+        return this.volume;
     }
 
     public void setVolume(int volume) {
         this.volume = volume;
     }
+
+    public void setMuted(boolean muted){this.muted = muted;}
+    public boolean getMuted(){return this.muted;}
 }
