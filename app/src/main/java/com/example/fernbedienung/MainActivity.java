@@ -5,14 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,9 +18,18 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SeekBar;
 
-import java.io.Console;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.Vector;
 
 import androidx.appcompat.widget.Toolbar;
 
@@ -37,13 +43,15 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler;
     private ArrayList<Channel> channels;
     private long time = 0;
-    private int volume = 0; //muss später durch persistente daten angepasst werden
+    private int volume; //muss später durch persistente daten angepasst werden
     private boolean muted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        this.volume = readVolume("Volume.txt");
 
         //INIT TV-Server
         this.handler = new Handler(getMainLooper()) {
@@ -158,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
         //volume bar
         final SeekBar volSeekBar = (SeekBar) findViewById(R.id.volumeSeekBar);
         volSeekBar.setMax(100);
+        volSeekBar.setProgress(this.volume);
         volSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -246,7 +255,65 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void startTV_Server() throws IOException, JSONException {
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        writeVolume("Volume.txt");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        writeVolume("Volume.txt");
+    }
+
+    public int readVolume(String filename) {
+        int volume = 0;
+        try {
+            InputStream inputStream = this.openFileInput(filename);
+
+            if (inputStream != null) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                if ((receiveString = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(receiveString);
+                    volume = Integer.parseInt(stringBuilder.toString());
+                }
+
+
+
+                inputStream.close();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return volume;
+    }
+
+
+    public void writeVolume(String filename) {
+        try {
+            String output = this.volume + "";
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(this.openFileOutput(filename, Context.MODE_PRIVATE));
+            outputStreamWriter.flush();
+            outputStreamWriter.write(output);
+            outputStreamWriter.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+        public void startTV_Server() throws IOException, JSONException {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
