@@ -7,6 +7,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,7 +17,7 @@ import androidx.appcompat.widget.Toolbar;
 import org.json.JSONObject;
 
 public class SettingsActivity  extends AppCompatActivity {
-    private TV_Server tv;
+
     private Handler handler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,9 +29,7 @@ public class SettingsActivity  extends AppCompatActivity {
                 super.handleMessage(msg);
             }
         };
-        this.tv = new TV_Server(getApplicationContext(), handler);
-        this.tv.setHandler(handler);
-        this.tv.setContext(getApplicationContext());
+
         //TV-server initialialized
         setContentView(R.layout.activity_settings);
 
@@ -41,6 +41,18 @@ public class SettingsActivity  extends AppCompatActivity {
         // Sets the Toolbar to act as the ActionBar for this Activity window.
         // Make sure the toolbar exists in the activity and is not null
         setSupportActionBar(toolbar);
+
+        Button channelScanBtn = (Button) findViewById(R.id.channelScan_Btn);
+        channelScanBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try{
+
+                }catch(Exception e){
+
+                }
+            }
+        });
     }
     // Menu icons are inflated just as they were with actionbar
     @Override
@@ -58,6 +70,7 @@ public class SettingsActivity  extends AppCompatActivity {
                 AsyncTask.execute(new Runnable() {
                     @Override
                     public void run() {
+                        TV_Server tv = new TV_Server(getApplicationContext(), handler);
                         JSONObject response = tv.doInBackground(new String[] {"standby=1"});
                     }
                 });
