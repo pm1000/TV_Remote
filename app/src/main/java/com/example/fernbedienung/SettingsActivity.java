@@ -30,7 +30,7 @@ public class SettingsActivity  extends AppCompatActivity {
         this.tv = new TV_Server(getApplicationContext(), handler);
         this.tv.setHandler(handler);
         this.tv.setContext(getApplicationContext());
-        //TV-server initialialized
+        //TV-server initialized
         setContentView(R.layout.activity_settings);
 
         // Find the toolbar view inside the activity layout
