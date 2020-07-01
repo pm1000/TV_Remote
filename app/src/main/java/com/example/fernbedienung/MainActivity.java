@@ -32,6 +32,7 @@ import java.util.Scanner;
 import java.util.Vector;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,17 +42,22 @@ public class MainActivity extends AppCompatActivity {
     public static final String MESSAGE_KEY = "";
     private TV_Server tv;
     private Handler handler;
-    private ArrayList<Channel> channels;
+    private ChannelAdapter adapter;
+    private final ArrayList<Channel> channels = new ArrayList<>();
     private long time = 0;
     private int volume; //muss später durch persistente daten angepasst werden
     private boolean muted = false;
+    private boolean standby = false;
+    private ListView listview;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
 
         this.volume = readVolume("Volume.txt");
+        this.channels.add(new Channel("Lade Kanäle..."));
+        this.adapter = new ChannelAdapter(this, channels, R.color.light);
 
         //INIT TV-Server
         this.handler = new Handler(getMainLooper()) {
@@ -59,30 +65,40 @@ public class MainActivity extends AppCompatActivity {
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
                 //evaluate msg
+                Log.i("NetChannelLoader", "Started!");
                 try {
                     //get correct JSON Object
+                    tv.showToastBeginChannelScan();
                     JSONObject full_obj = new JSONObject(msg.getData().getString(MainActivity.MESSAGE_KEY));
+                    Log.i("NetChannelLoader", "Got Objects!");
+                    Log.i("NetChannelLoader", "Length is "+full_obj.length());
                     if(full_obj.has("channels")) {
                         //if channels do exist, evaluate them
+                        Log.i("NetChannelLoader", "channels item found!");
                         JSONArray channellist = full_obj.getJSONArray("channels");
+                        Log.i("NetChannelLoader", "Found "+channellist.length()+" channels!");
                         for(int i = 0; i<channellist.length(); i++) {
-                            JSONObject element = channellist.getJSONObject(i);
                             //create single channel
-                            channels.add(new Channel(element.getString("program")));
-                            channels.get(channels.size()-1);
+                            MainActivity.this.channels.add(new Channel(channellist.getJSONObject(i)));
                         }
+                        Log.i("NetChannelLoader", "After adding Mainactivity.channels holds " + MainActivity.this.channels.size() + " elements!");
+                        MainActivity.this.adapter = new ChannelAdapter(MainActivity.this, MainActivity.this.channels, R.color.light);
                     }
-
+                    tv.showToastFinishedChannelScan();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                Log.i("NetChannelLoader", "Done!");
             }
         };
-        this.tv = new TV_Server(getApplicationContext(), handler);
-        this.tv.setHandler(handler);
+        this.tv = new TV_Server(getApplicationContext(), this.handler);
         this.tv.setContext(getApplicationContext());
 
-        //TV-server initialialized
+        /*The next line should be replaced by loading channels from file*/
+        this.startTV_Server();
+
+
+        //TV-server initialized
         //Setting up content view
         setContentView(R.layout.activity_main);
         // Find the toolbar view inside the activity layout
@@ -94,31 +110,17 @@ public class MainActivity extends AppCompatActivity {
         // Make sure the toolbar exists in the activity and is not null
         setSupportActionBar(toolbar);
 
-        //Get the ChannelList, jetzt überflüssig
-        /*try {
-            startTV_Server();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }*/
-
-        //Bundle msg = this.handler.obtainMessage().;
-        //Log.i("TMP",msg.getString("channels"));
-
-
-        final ArrayList<Channel> channels = new ArrayList<>();
-        channels.add(new Channel("Lade Kanäle..."));
-
-        ChannelAdapter adapter = new ChannelAdapter(this, channels, R.color.light);
-
-        final ListView listView = (ListView) findViewById(R.id.channel_list);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        this.listview = (ListView) findViewById(R.id.channel_list);
+        this.listview.setAdapter(this.adapter);
+        this.listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Channel channel = channels.get(position);
+                Channel channel = MainActivity.this.channels.get(position);
                 //SENDER UMSCHALTEN
+                TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                String[] command = new String[1];
+                command[0] ="channelMain=" + channel.getChannel();
+                tv.execute(command);
             }
         });
 
@@ -143,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 //methode für nächsten channel auswählen benötigt
                 String[] command = new String[1];
                 command[0] ="channelMain="; //- nummer
-                tv.doInBackground(command);
+                tv.execute(command);
             }
         });
 
@@ -313,14 +315,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-        public void startTV_Server() throws IOException, JSONException {
-        AsyncTask.execute(new Runnable() {
+    public void startTV_Server() {
+        this.tv.execute("scanChannels");
+        /*AsyncTask.execute(new Runnable() {
+
             @Override
             public void run() {
                 JSONObject response = tv.doInBackground(new String[] {"scanChannels"});
                 Log.i("TMP", response.toString());
             }
-        });
+        });*/
 
     }
     // Menu icons are inflated just as they were with actionbar
@@ -337,12 +341,22 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.button_activate:
                 //Send switch off signal
-                AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        JSONObject response = tv.doInBackground(new String[] {"standby=1"});
-                    }
-                });
+                this.standby = !this.standby;
+                if(this.standby) {
+                    AsyncTask.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSONObject response = tv.doInBackground(new String[]{"standby=1"});
+                        }
+                    });
+                } else {
+                    AsyncTask.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSONObject response = tv.doInBackground(new String[]{"standby=0"});
+                        }
+                    });
+                }
                 return true;
             case R.id.button_picInPic:
                 //Change to activity_picinpic
@@ -380,7 +394,6 @@ public class MainActivity extends AppCompatActivity {
     public void setVolume(int volume) {
         this.volume = volume;
     }
-
     public void setMuted(boolean muted){this.muted = muted;}
     public boolean getMuted(){return this.muted;}
 }

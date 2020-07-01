@@ -19,9 +19,12 @@ public class ChannelAdapter extends ArrayAdapter<Channel>  {
     private int colorResourceID;
     private int favoriteChannel = R.drawable.star_favorite;
     private int notFavoriteChannel = R.drawable.star_not_favorite;
+    private Activity context;
+    private ViewGroup parent;
 
     public ChannelAdapter(Activity context, ArrayList<Channel> channels, int colorResourceID){
         super(context,0, channels);
+        this.context = context;
         this.colorResourceID = colorResourceID;
     }
     @NonNull
@@ -29,10 +32,11 @@ public class ChannelAdapter extends ArrayAdapter<Channel>  {
     public View getView(int position, View convertView, ViewGroup parent) {
         // Check if the existing view is being reused, otherwise inflate the view
         View listItemView = convertView;
+        this.parent = parent;
 
         if (listItemView == null) {
             listItemView = LayoutInflater.from(getContext()).inflate(
-                    R.layout.list_item, parent, false);
+                    R.layout.list_item, this.parent, false);
         }
 
         // Get the {@link AndroidFlavor} object located at this position in the list
@@ -51,14 +55,17 @@ public class ChannelAdapter extends ArrayAdapter<Channel>  {
 
         if (currentChannel.getFavorite()) {
             channelImageView.setImageResource(favoriteChannel);
-        }
-        else{
+        } else {
             channelImageView.setImageResource(notFavoriteChannel);
         }
 
         return listItemView;
     }
     public void updateChannels(ArrayList<Channel> channels) {
-
+        this.clear();
+        this.addAll(channels);
+        this.notifyDataSetChanged();
+        LayoutInflater.from(getContext()).inflate(
+                R.layout.list_item, this.parent, false);
     }
 }
