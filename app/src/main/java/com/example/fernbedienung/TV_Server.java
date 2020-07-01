@@ -30,11 +30,13 @@ public class TV_Server extends AsyncTask<String, Void, JSONObject> {
     private boolean running;
     private Handler handler;
     //private static TV_Server Instance =null;
+    boolean channelScan;
 
-    public TV_Server(Context context, Handler handler) {
+    public TV_Server(Context context, Handler handler, boolean channelscan) {
         this.request = new HttpRequest("192.168.178.61", 1000);;
         this.context = context;
         this.handler = handler;
+        this.channelScan = channelscan;
     }
 
     /*public static TV_Server getInstance() {
@@ -78,7 +80,8 @@ public class TV_Server extends AsyncTask<String, Void, JSONObject> {
     protected void onPreExecute() {
 //        super.onPreExecute();
         Log.e(TAG, "onPreExecute() was called...");
-        //Toast.makeText(this.context, "Started Channel Scan", Toast.LENGTH_SHORT).show();
+        if (channelScan)
+            Toast.makeText(this.context, "Started Channel Scan", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -89,6 +92,7 @@ public class TV_Server extends AsyncTask<String, Void, JSONObject> {
         bundle.putString(MainActivity.MESSAGE_KEY, jsonObject.toString());
         msg.setData(bundle);
         this.handler.sendMessage(msg);
-        //Toast.makeText(this.context, "Channel Scan finished", Toast.LENGTH_SHORT).show();
+        if (channelScan)
+            Toast.makeText(this.context, "Channel Scan finished", Toast.LENGTH_SHORT).show();
     }
 }

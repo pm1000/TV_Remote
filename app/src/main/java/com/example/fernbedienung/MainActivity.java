@@ -19,10 +19,12 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
 
 import java.util.ArrayList;
@@ -49,9 +51,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         this.volume = readVolume("Volume.txt");
-
+        this.channels = getChannels("channels");
         //INIT TV-Server
-        this.handler = new Handler(getMainLooper()) {
+        /*this.handler = new Handler(getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
@@ -75,9 +77,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        this.tv = new TV_Server(getApplicationContext(), handler);
+        this.tv = new TV_Server(getApplicationContext(), handler, false);
         this.tv.setHandler(handler);
-        this.tv.setContext(getApplicationContext());
+        this.tv.setContext(getApplicationContext());*/
 
         //TV-server initialialized
         //Setting up content view
@@ -124,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
         upBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                 //methode für nächsten channel auswählen benötigt
                 String[] command = new String[1];
                 command[0] ="channelMain="; //+ nummer
@@ -136,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         downBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                 //methode für nächsten channel auswählen benötigt
                 String[] command = new String[1];
                 command[0] ="channelMain="; //- nummer
@@ -150,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                 String[] command = new String[1];
                 command[0] = "timeShiftPause=";
                 tv.execute(command);
@@ -168,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
-                    TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                    TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                     String[] command = new String[1];
                     command[0] = "volume=" + progress;
                     tv.execute(command);
@@ -192,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
         upVolButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                 String[] command = new String[1];
                 int newVolume;
                 if (MainActivity.this.getVolume() < 100){
@@ -211,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
         downVolButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                 String[] command = new String[1];
                 int newVolume;
                 if (MainActivity.this.getVolume() > 0){
@@ -231,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (MainActivity.this.getMuted()) {
-                    TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                    TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                     String[] command = new String[1];
                     command[0] = "volume=" + MainActivity.this.getVolume();
                     tv.execute(command);
@@ -239,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
                     volSeekBar.setProgress(MainActivity.this.getVolume());
                 }else
                 {
-                    TV_Server tv = new TV_Server(getApplicationContext(), handler);
+                    TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                     String[] command = new String[1];
                     command[0] = "volume=0";
                     tv.execute(command);
@@ -264,6 +266,36 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
 
         writeVolume("Volume.txt");
+    }
+
+    private ArrayList<Channel> getChannels(String filename){
+        ArrayList<Channel> al = new ArrayList<Channel>();
+        boolean cont = true;
+        try {
+            //FileInputStream fis = new FileInputStream("channels");
+            FileInputStream fis = this.openFileInput("channels");
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            while(cont){
+                Channel obj =null;
+                try {
+                    obj = (Channel) ois.readObject();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                if(obj != null)
+                    al.add(obj);
+                else
+                    cont = false;
+            }
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return al;
     }
 
     public int readVolume(String filename) {

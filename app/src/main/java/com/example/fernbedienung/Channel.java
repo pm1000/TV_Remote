@@ -1,6 +1,8 @@
 package com.example.fernbedienung;
 
-public class Channel {
+import java.io.Serializable;
+
+public class Channel implements Serializable {
 
     private int frequency;
     private String channel;
@@ -10,8 +12,20 @@ public class Channel {
 
     private boolean favorite = false;
 
+    public Channel(){
+
+    }
+
     public Channel(String name) {
         this.program = name;
+    }
+
+    public Channel(int frequency, String channel, int quality, String program, String provider){
+        this.frequency = frequency;
+        this.channel = channel;
+        this.quality = quality;
+        this.program = program;
+        this.provider = provider;
     }
 
     public String getName() {
