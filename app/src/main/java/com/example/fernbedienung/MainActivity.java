@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -37,50 +38,24 @@ import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
     public static final String MESSAGE_KEY = "";
-    private TV_Server tv;
     private Handler handler;
     private ArrayList<Channel> channels;
     private long time = 0;
-    private int volume; //muss später durch persistente daten angepasst werden
+    private int volume;
     private boolean muted = false;
+    private boolean standby = false;
+    private String activeChannel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
-        this.volume = readVolume("Volume.txt");
+        this.volume = readInt("Volume.txt");
         this.channels = getChannels("channels");
-        //INIT TV-Server
-        /*this.handler = new Handler(getMainLooper()) {
-            @Override
-            public void handleMessage(@NonNull Message msg) {
-                super.handleMessage(msg);
-                //evaluate msg
-                try {
-                    //get correct JSON Object
-                    JSONObject full_obj = new JSONObject(msg.getData().getString(MainActivity.MESSAGE_KEY));
-                    if(full_obj.has("channels")) {
-                        //if channels do exist, evaluate them
-                        JSONArray channellist = full_obj.getJSONArray("channels");
-                        for(int i = 0; i<channellist.length(); i++) {
-                            JSONObject element = channellist.getJSONObject(i);
-                            //create single channel
-                            channels.add(new Channel(element.getString("program")));
-                            channels.get(channels.size()-1);
-                        }
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        this.tv = new TV_Server(getApplicationContext(), handler, false);
-        this.tv.setHandler(handler);
-        this.tv.setContext(getApplicationContext());*/
-
-        //TV-server initialialized
+        this.standby = readInt("standby.txt") != 0;
+        this.muted = readInt("muted.txt") != 0;
+        this.activeChannel = readString("activeChannel.txt");
         //Setting up content view
         setContentView(R.layout.activity_main);
         // Find the toolbar view inside the activity layout
@@ -92,22 +67,9 @@ public class MainActivity extends AppCompatActivity {
         // Make sure the toolbar exists in the activity and is not null
         setSupportActionBar(toolbar);
 
-        //Get the ChannelList, jetzt überflüssig
-        /*try {
-            startTV_Server();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }*/
-
-        //Bundle msg = this.handler.obtainMessage().;
-        //Log.i("TMP",msg.getString("channels"));
-
-
-        final ArrayList<Channel> channels = new ArrayList<>();
-        channels.add(new Channel("Lade Kanäle..."));
-
+        if(channels.isEmpty()) {
+            channels.add(new Channel("Keine Kanäle vorhanden!\nBitte Kanalscan durchführen!"));
+        }
         ChannelAdapter adapter = new ChannelAdapter(this, channels, R.color.light);
 
         final ListView listView = (ListView) findViewById(R.id.channel_list);
@@ -115,8 +77,12 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Channel channel = channels.get(position);
+                activeChannel = channels.get(position).getChannel();
                 //SENDER UMSCHALTEN
+                TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+                String[] command = new String[1];
+                command[0] ="channelMain=" + activeChannel;
+                tv.execute(command);
             }
         });
 
@@ -126,9 +92,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
-                //methode für nächsten channel auswählen benötigt
+                if(activeChannel == "") {
+                    activeChannel = channels.get(0).getChannel();
+                } else {
+                    int i = 0;
+                    while (i < channels.size() && channels.get(i++).getChannel() != activeChannel);
+                    if(i == channels.size()) {
+                        i=0;
+                    }
+                    activeChannel = channels.get(i).getChannel();
+                }
                 String[] command = new String[1];
-                command[0] ="channelMain="; //+ nummer
+                command[0] ="channelMain="+ activeChannel;
                 tv.execute(command);
             }
         });
@@ -138,10 +113,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
-                //methode für nächsten channel auswählen benötigt
+                if(activeChannel == "") {
+                    activeChannel = channels.get(0).getChannel();
+                } else {
+                    int i = channels.size()-1;
+                    while (i >= 0 && channels.get(i--).getChannel() != activeChannel);
+                    if(i == -1) {
+                        i=channels.size()-1;
+                    }
+                    activeChannel = channels.get(i).getChannel();
+                }
                 String[] command = new String[1];
-                command[0] ="channelMain="; //- nummer
-                tv.doInBackground(command);
+                command[0] ="channelMain="+ activeChannel;
+                tv.execute(command);
             }
         });
 
@@ -256,15 +240,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-
         writeVolume("Volume.txt");
+        writeBool("standby.txt", this.standby);
+        writeBool("muted.txt", this.muted);
+        writeDataToFile("activeChannel.txt", this.activeChannel);
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         writeVolume("Volume.txt");
+        writeBool("standby.txt", this.standby);
+        writeBool("muted.txt", this.muted);
+        writeDataToFile("activeChannel.txt", this.activeChannel);
+
     }
 
     private ArrayList<Channel> getChannels(String filename){
@@ -297,11 +287,10 @@ public class MainActivity extends AppCompatActivity {
         return al;
     }
 
-    public int readVolume(String filename) {
+    public int readInt(String filename) {
         int volume = 0;
         try {
             InputStream inputStream = this.openFileInput(filename);
-
             if (inputStream != null) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -312,9 +301,6 @@ public class MainActivity extends AppCompatActivity {
                     stringBuilder.append(receiveString);
                     volume = Integer.parseInt(stringBuilder.toString());
                 }
-
-
-
                 inputStream.close();
             }
         } catch (FileNotFoundException e) {
@@ -322,17 +308,49 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return volume;
     }
 
+    public String readString(String filename) {
+        String value = "";
+        try {
+            InputStream inputStream = this.openFileInput(filename);
+            if (inputStream != null) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                if ((receiveString = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(receiveString);
+                    value = stringBuilder.toString();
+                }
+                inputStream.close();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return value;
+    }
 
     public void writeVolume(String filename) {
+        writeInt(filename, this.volume);
+    }
+
+    public void writeInt(String filename, int value) {
+        writeDataToFile(filename, Integer.toString(value));
+    }
+    public void writeBool(String filename, boolean value) {
+        writeInt(filename, (value)?1:0);
+    }
+
+    public void writeDataToFile(String filename, String data) {
         try {
-            String output = this.volume + "";
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(this.openFileOutput(filename, Context.MODE_PRIVATE));
             outputStreamWriter.flush();
-            outputStreamWriter.write(output);
+            outputStreamWriter.write(data);
             outputStreamWriter.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -341,16 +359,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-        public void startTV_Server() throws IOException, JSONException {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                JSONObject response = tv.doInBackground(new String[] {"scanChannels"});
-                Log.i("TMP", response.toString());
-            }
-        });
-
-    }
     // Menu icons are inflated just as they were with actionbar
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -365,12 +373,24 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.button_activate:
                 //Send switch off signal
-                AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        JSONObject response = tv.doInBackground(new String[] {"standby=1"});
-                    }
-                });
+                this.standby = !this.standby;
+                if(this.standby) {
+                    AsyncTask.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+                            tv.execute(new String[]{"standby=1"});
+                        }
+                    });
+                } else {
+                    AsyncTask.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+                            tv.execute(new String[]{"standby=0"});
+                        }
+                    });
+                }
                 return true;
             case R.id.button_picInPic:
                 //Change to activity_picinpic

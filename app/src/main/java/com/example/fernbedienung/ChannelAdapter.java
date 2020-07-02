@@ -64,7 +64,5 @@ public class ChannelAdapter extends ArrayAdapter<Channel>  {
         this.clear();
         this.addAll(channels);
         this.notifyDataSetChanged();
-        LayoutInflater.from(getContext()).inflate(
-                R.layout.list_item, this.parent, false);
     }
 }
