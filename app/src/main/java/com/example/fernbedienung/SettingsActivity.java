@@ -53,9 +53,6 @@ public class SettingsActivity  extends AppCompatActivity {
                             //channels.get(channels.size() - 1);
                         }
 
-                        File path = Environment.getExternalStoragePublicDirectory(
-                                Environment.DIRECTORY_MOVIES);
-                        File file = new File(path, "/" + "channels");
                         FileOutputStream fos = openFileOutput("channels", Context.MODE_PRIVATE);
                         ObjectOutputStream oos = new ObjectOutputStream(fos);
                         for (int x = 0; x < channellist.length(); x++){
