@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Fernbedienung.iml" filepath="$PROJECT_DIR$/Fernbedienung.iml" group="Fernbedienung" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="Fernbedienung/app" />
-      <module fileurl="file://$PROJECT_DIR$/app/nzse-gruppe18-app.iml" filepath="$PROJECT_DIR$/app/nzse-gruppe18-app.iml" group="Fernbedienung/app" />
     </modules>
   </component>
 </project>

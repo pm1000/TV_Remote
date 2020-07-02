@@ -38,5 +38,6 @@ public class Channel implements Serializable {
     public boolean getFavorite() {
         return favorite;
     }
+    public String getChannel() { return this.channel; }
 
 }

@@ -1,7 +1,6 @@
 package com.example.fernbedienung;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,7 +64,5 @@ public class ChannelAdapter extends ArrayAdapter<Channel>  {
         this.clear();
         this.addAll(channels);
         this.notifyDataSetChanged();
-        LayoutInflater.from(getContext()).inflate(
-                R.layout.list_item, this.parent, false);
     }
 }

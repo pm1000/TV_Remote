@@ -8,9 +8,6 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.fernbedienung.HttpRequest;
-import com.example.fernbedienung.MainActivity;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,7 +30,7 @@ public class TV_Server extends AsyncTask<String, Void, JSONObject> {
     boolean channelScan;
 
     public TV_Server(Context context, Handler handler, boolean channelscan) {
-        this.request = new HttpRequest("192.168.178.61", 1000);;
+        this.request = new HttpRequest("192.168.173.1", 1000);;
         this.context = context;
         this.handler = handler;
         this.channelScan = channelscan;
@@ -91,8 +88,9 @@ public class TV_Server extends AsyncTask<String, Void, JSONObject> {
         Bundle bundle = new Bundle();
         bundle.putString(MainActivity.MESSAGE_KEY, jsonObject.toString());
         msg.setData(bundle);
-        this.handler.sendMessage(msg);
-        if (channelScan)
+        if (channelScan) {
+            this.handler.sendMessage(msg);
             Toast.makeText(this.context, "Channel Scan finished", Toast.LENGTH_SHORT).show();
+        }
     }
 }
