@@ -1,7 +1,5 @@
 package com.example.fernbedienung;
 
-import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 

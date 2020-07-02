@@ -10,9 +10,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-import com.example.fernbedienung.HttpRequest;
-import com.example.fernbedienung.MainActivity;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
