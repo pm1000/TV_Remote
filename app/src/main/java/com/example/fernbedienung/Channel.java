@@ -1,9 +1,8 @@
 package com.example.fernbedienung;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.Serializable;
 
-public class Channel {
+public class Channel implements Serializable {
 
     private int frequency;
     private String channel;
@@ -13,23 +12,24 @@ public class Channel {
 
     private boolean favorite = false;
 
+    public Channel(){
+
+    }
+
     public Channel(String name) {
         this.program = name;
     }
-    public Channel(JSONObject json) {
-        try {
-            this.program = json.getString("program");
-            this.channel = json.getString("channel");
-            this.frequency = json.getInt("frequency");
-            this.quality = json.getInt("quality");
-            this.provider = json.getString("provider");
-        }
-        catch (JSONException e) {
-            e.printStackTrace();
-        }
+
+    public Channel(int frequency, String channel, int quality, String program, String provider){
+        this.frequency = frequency;
+        this.channel = channel;
+        this.quality = quality;
+        this.program = program;
+        this.provider = provider;
     }
 
     public String getName() {
+
         return program;
     }
     public void setFavorite(boolean favorite) {
@@ -39,7 +39,4 @@ public class Channel {
         return favorite;
     }
 
-    public String getChannel() {
-        return channel;
-    }
 }

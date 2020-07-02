@@ -33,7 +33,7 @@ public class FavoriteActivity extends AppCompatActivity {
                 super.handleMessage(msg);
             }
         };
-        this.tv = new TV_Server(getApplicationContext(), handler);
+        this.tv = new TV_Server(getApplicationContext(), handler, false);
         this.tv.setHandler(handler);
         this.tv.setContext(getApplicationContext());
         //TV-server initialialized
