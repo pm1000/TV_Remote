@@ -6,49 +6,37 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
-    <TextView
-        android:id="@+id/txt_Swt_PIP2"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:labelFor="@id/swt_toggleControl"
-        android:text="@string/menu_pip_title"
-        android:textAlignment="textStart"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="@+id/swt_toggleControl"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/swt_toggleControl"
-        app:layout_constraintTop_toTopOf="@+id/swt_toggleControl"
-        app:layout_constraintVertical_bias="0.0" />
-
     <include
         android:id="@+id/toolbar"
         layout="@layout/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true" />
 
     <include
         android:id="@+id/channel_list"
         layout="@layout/channel_list"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="16dp"
         android:layout_weight="5"
-        app:layout_constraintBottom_toTopOf="@+id/guideline"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
 
     <Switch
         android:id="@+id/swt_toggleControl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="16dp"
+        android:textAlignment="center"
+        android:textOff="@string/menu_pip_title"
+        android:textOn="Main Screen"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/txt_Swt_PIP"
+        app:layout_constraintStart_toStartOf="@+id/guideline4"
         app:layout_constraintTop_toTopOf="@+id/guideline3" />
 
     <Button
@@ -60,7 +48,7 @@
         android:scaleY="1"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toStartOf="@+id/txt_const_Programm"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline4"
         app:layout_constraintTop_toTopOf="@+id/guideline" />
 
     <TextView
@@ -92,23 +80,23 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:foreground="@drawable/ic_volume_up_black_24dp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline3"
+        app:layout_constraintBottom_toTopOf="@+id/volumeSeekBar"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btn_volume_down"
         app:layout_constraintTop_toTopOf="@+id/guideline2" />
 
 
     <SeekBar
         android:id="@+id/volumeSeekBar"
         android:layout_width="0dp"
-        android:layout_height="50dp"
+        android:layout_height="0dp"
         android:layout_weight="5"
         android:max="200"
         android:progress="0"
         app:layout_constraintBottom_toTopOf="@+id/guideline3"
-        app:layout_constraintEnd_toStartOf="@+id/btn_volume_up"
-        app:layout_constraintStart_toEndOf="@+id/btn_volume_down"
-        app:layout_constraintTop_toTopOf="@+id/guideline2"
-        app:layout_constraintVertical_bias="0.5" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline4"
+        app:layout_constraintTop_toBottomOf="@+id/btn_volume_up" />
 
     <Button
         android:id="@+id/btn_volume_mute"
@@ -116,9 +104,10 @@
         android:layout_height="60dp"
         android:foreground="@drawable/ic_volume_mute_black_24dp"
         android:src="@drawable/star_not_favorite"
-        app:layout_constraintBottom_toTopOf="@+id/guideline3"
+        app:layout_constraintBottom_toTopOf="@+id/volumeSeekBar"
         app:layout_constraintEnd_toStartOf="@+id/btn_volume_down"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/guideline4"
         app:layout_constraintTop_toTopOf="@+id/guideline2" />
 
     <androidx.constraintlayout.widget.Guideline
@@ -127,7 +116,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@id/txt_const_Programm"
-        app:layout_constraintGuide_percent="0.7" />
+        app:layout_constraintGuide_percent="0.12" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline2"
@@ -135,7 +124,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@id/btn_volume_mute"
-        app:layout_constraintGuide_percent="0.8" />
+        app:layout_constraintGuide_percent="0.41" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline3"
@@ -143,18 +132,39 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@id/swt_toggleControl"
-        app:layout_constraintGuide_percent="0.90" />
+        app:layout_constraintGuide_percent="0.74" />
 
     <Button
         android:id="@+id/btn_volume_down"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:foreground="@drawable/ic_volume_down_black_24dp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline3"
-        app:layout_constraintEnd_toStartOf="@+id/volumeSeekBar"
+        app:layout_constraintBottom_toTopOf="@+id/volumeSeekBar"
+        app:layout_constraintEnd_toStartOf="@+id/btn_volume_up"
         app:layout_constraintLeft_toRightOf="@id/btn_volume_mute"
         app:layout_constraintStart_toEndOf="@+id/btn_volume_mute"
         app:layout_constraintTop_toTopOf="@+id/guideline2" />
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.66" />
+
+    <TextView
+        android:id="@+id/txt_Swt_PIP"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:labelFor="@id/swt_toggleControl"
+        android:text="@string/menu_pip_title"
+        android:textAlignment="textStart"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/swt_toggleControl"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/swt_toggleControl"
+        app:layout_constraintTop_toTopOf="@+id/swt_toggleControl"
+        app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
