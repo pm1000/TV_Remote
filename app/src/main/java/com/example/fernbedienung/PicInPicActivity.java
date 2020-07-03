@@ -47,6 +47,8 @@ public class PicInPicActivity extends AppCompatActivity {
     private boolean muted = false;
     private boolean standby = false;
     private String activeChannel;
+    private String activePipChannel;
+
     private boolean pipControlActive = true;
 
     @Override
@@ -60,6 +62,12 @@ public class PicInPicActivity extends AppCompatActivity {
         this.standby = readInt("standby.txt") != 0;
         this.muted = readInt("muted.txt") != 0;
         this.activeChannel = readString("activeChannel.txt");
+        this.activePipChannel = readString("activePipChannel.txt");
+        //Show the PIP-window
+        TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+        String[] command = new String[1];
+        command[0] ="showPip=1";
+        tv.execute(command);
         //Setting up content view
         setContentView(R.layout.activity_picinpic);
         // Find the toolbar view inside the activity layout
@@ -81,12 +89,16 @@ public class PicInPicActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                activeChannel = channels.get(position).getChannel();
+                if(PicInPicActivity.this.pipControlActive) {
+                    activeChannel = channels.get(position).getChannel();
+                } else {
+                    activePipChannel = channels.get(position).getChannel();
+                }
                 //SENDER UMSCHALTEN
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                 String[] command = new String[1];
                 if(PicInPicActivity.this.pipControlActive) {
-                    command[0] ="channelPip="+ activeChannel;
+                    command[0] ="channelPip="+ activePipChannel;
                 } else {
                     command[0] = "channelMain=" + activeChannel;
                 }
@@ -100,19 +112,34 @@ public class PicInPicActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
-                if(activeChannel == "") {
-                    activeChannel = channels.get(0).getChannel();
-                } else {
-                    int i = 0;
-                    while (i < channels.size() && channels.get(i++).getChannel() != activeChannel);
-                    if(i == channels.size()) {
-                        i=0;
+                if(PicInPicActivity.this.pipControlActive) {
+                    if (activeChannel == "") {
+                        activeChannel = channels.get(0).getChannel();
+                    } else {
+                        int i = 0;
+                        while (i < channels.size() && channels.get(i++).getChannel() != activeChannel)
+                            ;
+                        if (i == channels.size()) {
+                            i = 0;
+                        }
+                        activeChannel = channels.get(i).getChannel();
                     }
-                    activeChannel = channels.get(i).getChannel();
+                } else {
+                    if (activePipChannel == "") {
+                        activePipChannel = channels.get(0).getChannel();
+                    } else {
+                        int i = 0;
+                        while (i < channels.size() && channels.get(i++).getChannel() != activePipChannel)
+                            ;
+                        if (i == channels.size()) {
+                            i = 0;
+                        }
+                        activePipChannel = channels.get(i).getChannel();
+                    }
                 }
                 String[] command = new String[1];
                 if(PicInPicActivity.this.pipControlActive) {
-                    command[0] ="channelPip="+ activeChannel;
+                    command[0] ="channelPip="+ activePipChannel;
                 } else {
                     command[0] = "channelMain=" + activeChannel;
                 }
@@ -125,15 +152,28 @@ public class PicInPicActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
-                if(activeChannel == "") {
-                    activeChannel = channels.get(0).getChannel();
-                } else {
-                    int i = channels.size()-1;
-                    while (i >= 0 && channels.get(i--).getChannel() != activeChannel);
-                    if(i == -1) {
-                        i=channels.size()-1;
+                if(PicInPicActivity.this.pipControlActive) {
+                    if (activeChannel == "") {
+                        activeChannel = channels.get(0).getChannel();
+                    } else {
+                        int i = channels.size();
+                        while (i >= 0 && channels.get(i--).getChannel() != activeChannel);
+                        if (i == -1) {
+                            i = channels.size()-1;
+                        }
+                        activeChannel = channels.get(i).getChannel();
                     }
-                    activeChannel = channels.get(i).getChannel();
+                } else {
+                    if (activePipChannel == "") {
+                        activePipChannel = channels.get(0).getChannel();
+                    } else {
+                        int i = channels.size();
+                        while (i >= 0 && channels.get(i--).getChannel() != activePipChannel);
+                        if (i == -1) {
+                            i = channels.size()-1;
+                        }
+                        activePipChannel = channels.get(i).getChannel();
+                    }
                 }
                 String[] command = new String[1];
                 if(PicInPicActivity.this.pipControlActive) {
@@ -265,6 +305,7 @@ public class PicInPicActivity extends AppCompatActivity {
         writeBool("standby.txt", this.standby);
         writeBool("muted.txt", this.muted);
         writeDataToFile("activeChannel.txt", this.activeChannel);
+        writeDataToFile("activePipChannel.txt", this.activePipChannel);
         writeBool("pipControl.txt", this.pipControlActive);
 
     }
@@ -381,6 +422,11 @@ public class PicInPicActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        //Hide the PIP-window
+        TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+        String[] command = new String[1];
+        command[0] ="showPip=0";
+        tv.execute(command);
         Intent changeIntent;
         switch (item.getItemId()) {
             case R.id.button_activate:
