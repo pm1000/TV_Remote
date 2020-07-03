@@ -15,8 +15,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -45,6 +47,7 @@ public class PicInPicActivity extends AppCompatActivity {
     private boolean muted = false;
     private boolean standby = false;
     private String activeChannel;
+    private boolean pipControlActive = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +56,7 @@ public class PicInPicActivity extends AppCompatActivity {
 
         this.volume = readInt("Volume.txt");
         this.channels = getChannels("channels");
+        this.pipControlActive = readInt("pipControl.txt") != 0;
         this.standby = readInt("standby.txt") != 0;
         this.muted = readInt("muted.txt") != 0;
         this.activeChannel = readString("activeChannel.txt");
@@ -81,7 +85,11 @@ public class PicInPicActivity extends AppCompatActivity {
                 //SENDER UMSCHALTEN
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                 String[] command = new String[1];
-                command[0] ="channelMain=" + activeChannel;
+                if(PicInPicActivity.this.pipControlActive) {
+                    command[0] ="channelPip="+ activeChannel;
+                } else {
+                    command[0] = "channelMain=" + activeChannel;
+                }
                 tv.execute(command);
             }
         });
@@ -103,7 +111,11 @@ public class PicInPicActivity extends AppCompatActivity {
                     activeChannel = channels.get(i).getChannel();
                 }
                 String[] command = new String[1];
-                command[0] ="channelMain="+ activeChannel;
+                if(PicInPicActivity.this.pipControlActive) {
+                    command[0] ="channelPip="+ activeChannel;
+                } else {
+                    command[0] = "channelMain=" + activeChannel;
+                }
                 tv.execute(command);
             }
         });
@@ -124,11 +136,23 @@ public class PicInPicActivity extends AppCompatActivity {
                     activeChannel = channels.get(i).getChannel();
                 }
                 String[] command = new String[1];
-                command[0] ="channelMain="+ activeChannel;
+                if(PicInPicActivity.this.pipControlActive) {
+                    command[0] ="channelPip="+ activeChannel;
+                } else {
+                    command[0] = "channelMain=" + activeChannel;
+                }
                 tv.execute(command);
             }
         });
 
+        //select either mainchannel or PIP-Channel
+        Switch PIP_switch = (Switch) findViewById(R.id.swt_toggleControl);
+        PIP_switch.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                PicInPicActivity.this.pipControlActive = isChecked;
+            }
+        });
 
 
         //volume bar
@@ -230,6 +254,7 @@ public class PicInPicActivity extends AppCompatActivity {
         writeBool("standby.txt", this.standby);
         writeBool("muted.txt", this.muted);
         writeDataToFile("activeChannel.txt", this.activeChannel);
+        writeBool("pipControl.txt", this.pipControlActive);
 
     }
 
@@ -240,6 +265,7 @@ public class PicInPicActivity extends AppCompatActivity {
         writeBool("standby.txt", this.standby);
         writeBool("muted.txt", this.muted);
         writeDataToFile("activeChannel.txt", this.activeChannel);
+        writeBool("pipControl.txt", this.pipControlActive);
 
     }
 
