@@ -57,7 +57,7 @@ public class PicInPicActivity extends AppCompatActivity {
         this.muted = readInt("muted.txt") != 0;
         this.activeChannel = readString("activeChannel.txt");
         //Setting up content view
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_picinpic);
         // Find the toolbar view inside the activity layout
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("tvNOW");
@@ -129,21 +129,7 @@ public class PicInPicActivity extends AppCompatActivity {
             }
         });
 
-        //timeshift
-        Button pauseBtn = (Button) findViewById(R.id.btn_pause);
-        pauseBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
-                String[] command = new String[1];
-                command[0] = "timeShiftPause=";
-                tv.execute(command);
-                PicInPicActivity.this.setTime(System.currentTimeMillis());
-                String tmp = "" + PicInPicActivity.this.time;
-                //layout muss angepasst werden
-            }
-        });
 
         //volume bar
         final SeekBar volSeekBar = (SeekBar) findViewById(R.id.volumeSeekBar);

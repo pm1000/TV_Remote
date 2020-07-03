@@ -30,12 +30,13 @@
         android:id="@+id/swt_toggleControl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:textAlignment="center"
         android:textOff="@string/menu_pip_title"
         android:textOn="Main Screen"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/txt_swt_Main"
-        app:layout_constraintStart_toEndOf="@+id/txt_Swt_PIP"
+        app:layout_constraintEnd_toStartOf="@+id/txt_Swt_PIP"
+        app:layout_constraintStart_toStartOf="@+id/guideline4"
         app:layout_constraintTop_toTopOf="@+id/guideline3" />
 
     <Button
@@ -155,28 +156,15 @@
         android:id="@+id/txt_Swt_PIP"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:labelFor="@id/swt_toggleControl"
         android:text="@string/menu_pip_title"
-        android:textAlignment="textEnd"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="@+id/swt_toggleControl"
-        app:layout_constraintEnd_toStartOf="@+id/swt_toggleControl"
-        app:layout_constraintHorizontal_bias="0.48"
-        app:layout_constraintStart_toStartOf="@+id/guideline4"
-        app:layout_constraintTop_toTopOf="@+id/swt_toggleControl"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <TextView
-        android:id="@+id/txt_swt_Main"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="Haupt-programm"
+        android:textAlignment="textStart"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="@+id/swt_toggleControl"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/swt_toggleControl"
-        app:layout_constraintTop_toTopOf="@+id/swt_toggleControl" />
+        app:layout_constraintTop_toTopOf="@+id/swt_toggleControl"
+        app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

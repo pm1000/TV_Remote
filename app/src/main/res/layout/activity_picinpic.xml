@@ -7,6 +7,21 @@
     android:layout_height="match_parent">
 
 
+    <TextView
+        android:id="@+id/txt_Swt_PIP2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:labelFor="@id/swt_toggleControl"
+        android:text="@string/menu_pip_title"
+        android:textAlignment="textStart"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/swt_toggleControl"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/swt_toggleControl"
+        app:layout_constraintTop_toTopOf="@+id/swt_toggleControl"
+        app:layout_constraintVertical_bias="0.0" />
+
     <include
         android:id="@+id/toolbar"
         layout="@layout/toolbar"
@@ -30,6 +45,7 @@
         android:id="@+id/swt_toggleControl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
