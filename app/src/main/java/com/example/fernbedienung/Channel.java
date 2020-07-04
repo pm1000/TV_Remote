@@ -9,7 +9,6 @@ public class Channel implements Serializable {
     private int quality;
     private String program;
     private String provider;
-
     private boolean favorite = false;
 
     public Channel(){

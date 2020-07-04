@@ -8,51 +8,55 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SeekBar;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 
 import java.util.ArrayList;
 
 import androidx.appcompat.widget.Toolbar;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
     public static final String MESSAGE_KEY = "";
     private Handler handler;
     private ArrayList<Channel> channels;
+    private ArrayList<Channel> faveChannels;
     private long time = 0;
     private int volume;
     private boolean muted = false;
     private boolean standby = false;
     private String activeChannel;
 
+    private int x = 0;
+    private int y = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
+        this.faveChannels = getFaveChannels();
         this.volume = readInt("Volume.txt");
         this.channels = getChannels("channels");
+
         this.standby = readInt("standby.txt") != 0;
         this.muted = readInt("muted.txt") != 0;
         this.activeChannel = readString("activeChannel.txt");
@@ -70,21 +74,60 @@ public class MainActivity extends AppCompatActivity {
         if(channels.isEmpty()) {
             channels.add(new Channel("Keine Kanäle vorhanden!\nBitte Kanalscan durchführen!"));
         }
-        ChannelAdapter adapter = new ChannelAdapter(this, channels, R.color.light);
+        final ChannelAdapter adapter = new ChannelAdapter(this, channels, R.color.light);
 
         final ListView listView = (ListView) findViewById(R.id.channel_list);
         listView.setAdapter(adapter);
+
+        listView.setOnTouchListener(new AdapterView.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                MainActivity.this.setX((int)event.getX());
+                MainActivity.this.setY((int)event.getY());
+                return false;
+            }
+
+
+        });
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                activeChannel = channels.get(position).getChannel();
-                //SENDER UMSCHALTEN
-                TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
-                String[] command = new String[1];
-                command[0] ="channelMain=" + activeChannel;
-                tv.execute(command);
+                Log.d("x: ", MainActivity.this.getX() + "");
+                Log.d("y: ", MainActivity.this.getY() + "");
+                if (MainActivity.this.getX() > 1145 && MainActivity.this.getX() < 1285){
+                    Channel channel = channels.get(position);
+                    if (channels.get(position).getFavorite()){
+                        channels.get(position).setFavorite(false);
+                        for (int x = 0; x < faveChannels.size(); x++){
+                            if (faveChannels.get(x).getChannel().equals(channels.get(position).getChannel())) {
+                                faveChannels.remove(x);
+                                continue;
+                            }
+                        }
+
+                    }else{
+                        channels.get(position).setFavorite(true);
+                        faveChannels.add(channels.get(position));
+                    }
+                    ChannelAdapter adap = new ChannelAdapter(MainActivity.this , channels, R.color.light);
+                    listView.setAdapter(adap);
+
+                }else {
+                    activeChannel = channels.get(position).getChannel();
+                    //SENDER UMSCHALTEN
+                    TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+                    String[] command = new String[1];
+                    command[0] = "channelMain=" + activeChannel;
+                    tv.execute(command);
+                }
             }
         });
+
+
+
 
         //sender zappen
         Button upBtn = (Button) findViewById(R.id.btn_channel_up);
@@ -244,6 +287,7 @@ public class MainActivity extends AppCompatActivity {
         writeBool("standby.txt", this.standby);
         writeBool("muted.txt", this.muted);
         writeDataToFile("activeChannel.txt", this.activeChannel);
+        saveFaveChannel("faveChannel");
 
     }
 
@@ -254,7 +298,7 @@ public class MainActivity extends AppCompatActivity {
         writeBool("standby.txt", this.standby);
         writeBool("muted.txt", this.muted);
         writeDataToFile("activeChannel.txt", this.activeChannel);
-
+        saveFaveChannel("faveChannel");
     }
 
     private ArrayList<Channel> getChannels(String filename){
@@ -277,11 +321,18 @@ public class MainActivity extends AppCompatActivity {
                     cont = false;
             }
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
+        }
+
+        for (int x = 0; x < faveChannels.size(); x++){
+            for (int y = 0; y < al.size(); y++)
+                if (faveChannels.get(x).getChannel().equals(al.get(y).getChannel())){
+                    al.get(y).setFavorite(true);
+                    break;
+                }
+
         }
 
         return al;
@@ -359,6 +410,49 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void saveFaveChannel(String filename){
+        try {
+            FileOutputStream fos = openFileOutput(filename, Context.MODE_PRIVATE);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            for (int x = 0; x < this.faveChannels.size(); x++) {
+                oos.writeObject(faveChannels.get(x));
+            }
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private ArrayList<Channel> getFaveChannels(){
+        ArrayList<Channel> al = new ArrayList<Channel>();
+        boolean cont = true;
+        try {
+            FileInputStream fis = this.openFileInput("faveChannel");
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            while(cont){
+                Channel obj =null;
+                try {
+                    obj = (Channel) ois.readObject();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                if(obj != null)
+                    al.add(obj);
+                else
+                    cont = false;
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return al;
+    }
+
     // Menu icons are inflated just as they were with actionbar
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -403,6 +497,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(changeIntent);
                 return true;
             case R.id.button_favorites:
+                saveFaveChannel("faveChannel");
                 //Change to activity_favorite
                 changeIntent = new Intent(this, FavoriteActivity.class);
                 startActivity(changeIntent);
@@ -431,4 +526,20 @@ public class MainActivity extends AppCompatActivity {
 
     public void setMuted(boolean muted){this.muted = muted;}
     public boolean getMuted(){return this.muted;}
+
+    public void setX(int x){
+        this.x = x;
+    }
+
+    public void setY(int y){
+        this.y = y;
+    }
+
+    public int getX(){
+        return this.x;
+    }
+
+    public int getY(){
+        return this.y;
+    }
 }
