@@ -41,33 +41,36 @@ import org.json.JSONObject;
 public class PicInPicActivity extends AppCompatActivity {
     public static final String MESSAGE_KEY = "";
     private Handler handler;
-    private ArrayList<Channel> channels;
     private long time = 0;
     private int volume;
     private boolean muted = false;
     private boolean standby = false;
     private String activeChannel;
     private String activePipChannel;
-
+    private int zoomstate = 0;
     private boolean pipControlActive = true;
+    private ChannelArray channels;
 
+    private Switch swt_zoom_pip;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
+        this.channels = ChannelArray.getInstance();
         this.volume = readInt("Volume.txt");
-        this.channels = getChannels("channels");
         this.pipControlActive = readInt("pipControl.txt") != 0;
         this.standby = readInt("standby.txt") != 0;
         this.muted = readInt("muted.txt") != 0;
         this.activeChannel = readString("activeChannel.txt");
         this.activePipChannel = readString("activePipChannel.txt");
+        this.zoomstate = readInt("zoomstate.txt");
         //Show the PIP-window
         TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
         String[] command = new String[1];
         command[0] ="showPip=1";
         tv.execute(command);
+
         //Setting up content view
         setContentView(R.layout.activity_picinpic);
         // Find the toolbar view inside the activity layout
@@ -79,10 +82,10 @@ public class PicInPicActivity extends AppCompatActivity {
         // Make sure the toolbar exists in the activity and is not null
         setSupportActionBar(toolbar);
 
-        if(channels.isEmpty()) {
-            channels.add(new Channel("Keine Kanäle vorhanden!\nBitte Kanalscan durchführen!"));
+        if(channels.getChannels().isEmpty()) {
+            channels.addChannel(new Channel("Keine Kanäle vorhanden!\nBitte Kanalscan durchführen!"));
         }
-        ChannelAdapter adapter = new ChannelAdapter(this, channels, R.color.light);
+        ChannelAdapter adapter = new ChannelAdapter(this, channels.getChannels(), R.color.light);
 
         final ListView listView = (ListView) findViewById(R.id.channel_list);
         listView.setAdapter(adapter);
@@ -90,9 +93,9 @@ public class PicInPicActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if(PicInPicActivity.this.pipControlActive) {
-                    activeChannel = channels.get(position).getChannel();
+                    activeChannel = channels.getChannelAt(position).getChannel();
                 } else {
-                    activePipChannel = channels.get(position).getChannel();
+                    activePipChannel = channels.getChannelAt(position).getChannel();
                 }
                 //SENDER UMSCHALTEN
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
@@ -114,27 +117,27 @@ public class PicInPicActivity extends AppCompatActivity {
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                 if(PicInPicActivity.this.pipControlActive) {
                     if (activeChannel == "") {
-                        activeChannel = channels.get(0).getChannel();
+                        activeChannel = channels.getChannelAt(0).getChannel();
                     } else {
                         int i = 0;
-                        while (i < channels.size() && channels.get(i++).getChannel() != activeChannel)
+                        while (i < channels.channelsSize() && channels.getChannelAt(i++).getChannel() != activeChannel)
                             ;
-                        if (i == channels.size()) {
+                        if (i == channels.channelsSize()) {
                             i = 0;
                         }
-                        activeChannel = channels.get(i).getChannel();
+                        activeChannel = channels.getChannelAt(i).getChannel();
                     }
                 } else {
                     if (activePipChannel == "") {
-                        activePipChannel = channels.get(0).getChannel();
+                        activePipChannel = channels.getChannelAt(0).getChannel();
                     } else {
                         int i = 0;
-                        while (i < channels.size() && channels.get(i++).getChannel() != activePipChannel)
+                        while (i < channels.channelsSize() && channels.getChannelAt(i++).getChannel() != activePipChannel)
                             ;
-                        if (i == channels.size()) {
+                        if (i == channels.channelsSize()) {
                             i = 0;
                         }
-                        activePipChannel = channels.get(i).getChannel();
+                        activePipChannel = channels.getChannelAt(i).getChannel();
                     }
                 }
                 String[] command = new String[1];
@@ -154,25 +157,25 @@ public class PicInPicActivity extends AppCompatActivity {
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                 if(PicInPicActivity.this.pipControlActive) {
                     if (activeChannel == "") {
-                        activeChannel = channels.get(0).getChannel();
+                        activeChannel = channels.getChannelAt(0).getChannel();
                     } else {
-                        int i = channels.size();
-                        while (i >= 0 && channels.get(i--).getChannel() != activeChannel);
+                        int i = channels.channelsSize();
+                        while (i >= 0 && channels.getChannelAt(i--).getChannel() != activeChannel);
                         if (i == -1) {
-                            i = channels.size()-1;
+                            i = channels.channelsSize()-1;
                         }
-                        activeChannel = channels.get(i).getChannel();
+                        activeChannel = channels.getChannelAt(i).getChannel();
                     }
                 } else {
                     if (activePipChannel == "") {
-                        activePipChannel = channels.get(0).getChannel();
+                        activePipChannel = channels.getChannelAt(0).getChannel();
                     } else {
-                        int i = channels.size();
-                        while (i >= 0 && channels.get(i--).getChannel() != activePipChannel);
+                        int i = channels.channelsSize();
+                        while (i >= 0 && channels.getChannelAt(i--).getChannel() != activePipChannel);
                         if (i == -1) {
-                            i = channels.size()-1;
+                            i = channels.channelsSize()-1;
                         }
-                        activePipChannel = channels.get(i).getChannel();
+                        activePipChannel = channels.getChannelAt(i).getChannel();
                     }
                 }
                 String[] command = new String[1];
@@ -187,13 +190,25 @@ public class PicInPicActivity extends AppCompatActivity {
 
         //select either mainchannel or PIP-Channel
         Switch PIP_switch = (Switch) findViewById(R.id.swt_toggleControl);
+        PIP_switch.setChecked(this.pipControlActive);
         PIP_switch.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 PicInPicActivity.this.pipControlActive = isChecked;
+                PicInPicActivity.this.updateZoomButtonPosition();
             }
         });
 
+        //zoom selected picture
+        this.swt_zoom_pip = (Switch)findViewById(R.id.swt_zoom0);
+        this.applyAllZoom(this.zoomstate);
+        this.updateZoomButtonPosition();
+        this.swt_zoom_pip.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                setZoomstate(isChecked);
+            }
+        });
 
         //volume bar
         final SeekBar volSeekBar = (SeekBar) findViewById(R.id.volumeSeekBar);
@@ -290,54 +305,13 @@ public class PicInPicActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        writeVolume("Volume.txt");
-        writeBool("standby.txt", this.standby);
-        writeBool("muted.txt", this.muted);
-        writeDataToFile("activeChannel.txt", this.activeChannel);
-        writeBool("pipControl.txt", this.pipControlActive);
-
+        saveData();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        writeVolume("Volume.txt");
-        writeBool("standby.txt", this.standby);
-        writeBool("muted.txt", this.muted);
-        writeDataToFile("activeChannel.txt", this.activeChannel);
-        writeDataToFile("activePipChannel.txt", this.activePipChannel);
-        writeBool("pipControl.txt", this.pipControlActive);
-
-    }
-
-    private ArrayList<Channel> getChannels(String filename){
-        ArrayList<Channel> al = new ArrayList<Channel>();
-        boolean cont = true;
-        try {
-            //FileInputStream fis = new FileInputStream("channels");
-            FileInputStream fis = this.openFileInput("channels");
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            while(cont){
-                Channel obj =null;
-                try {
-                    obj = (Channel) ois.readObject();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-                if(obj != null)
-                    al.add(obj);
-                else
-                    cont = false;
-            }
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        return al;
+        saveData();
     }
 
     public int readInt(String filename) {
@@ -356,8 +330,6 @@ public class PicInPicActivity extends AppCompatActivity {
                 }
                 inputStream.close();
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -380,8 +352,6 @@ public class PicInPicActivity extends AppCompatActivity {
                 }
                 inputStream.close();
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -405,8 +375,6 @@ public class PicInPicActivity extends AppCompatActivity {
             outputStreamWriter.flush();
             outputStreamWriter.write(data);
             outputStreamWriter.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -426,7 +394,6 @@ public class PicInPicActivity extends AppCompatActivity {
         TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
         String[] command = new String[1];
         command[0] ="showPip=0";
-        tv.execute(command);
         Intent changeIntent;
         switch (item.getItemId()) {
             case R.id.button_activate:
@@ -452,25 +419,35 @@ public class PicInPicActivity extends AppCompatActivity {
                 return true;
             case R.id.button_picInPic:
                 //Change to activity_picinpic
+                saveData();
+                tv.execute(command);
                 changeIntent = new Intent(this, PicInPicActivity.class);
                 startActivity(changeIntent);
                 return true;
             case R.id.button_homeScreen:
                 //Change to activity_main
+                saveData();
+                tv.execute(command);
                 changeIntent = new Intent(this, MainActivity.class);
                 startActivity(changeIntent);
                 return true;
             case R.id.button_favorites:
                 //Change to activity_favorite
+                saveData();
+                tv.execute(command);
                 changeIntent = new Intent(this, FavoriteActivity.class);
                 startActivity(changeIntent);
                 return true;
             case R.id.button_settings:
                 //Change to activity_settings
+                saveData();
+                tv.execute(command);
                 changeIntent = new Intent(this, SettingsActivity.class);
                 startActivity(changeIntent);
                 return true;
             default:
+                saveData();
+                tv.execute(command);
                 return super.onOptionsItemSelected(item);
         }
     }
@@ -489,4 +466,57 @@ public class PicInPicActivity extends AppCompatActivity {
 
     public void setMuted(boolean muted){this.muted = muted;}
     public boolean getMuted(){return this.muted;}
+
+    public void setZoomstate(boolean zoomButtonState) {
+        if(this.pipControlActive) {
+            if(((this.zoomstate & 2) == 0) == zoomButtonState) {
+                toggleZoom();
+            }
+        } else {
+            if(((this.zoomstate & 1) == 0) == zoomButtonState) {
+                toggleZoom();
+            }
+        }
+    }
+
+    public void toggleZoom() {
+        if(this.pipControlActive) {
+            //target is PIP-View
+            this.zoomstate = this.zoomstate ^ 2; // toggles second last digit: 01 => 11, 11 => 01, ...
+            this.applyPipZoom(this.zoomstate);
+        } else {
+            //target is main view
+            this.zoomstate = this.zoomstate ^ 1; // toggles second last digit: 01 => 11, 11 => 01, ...
+            this.applyMainZoom(this.zoomstate);
+        }
+    }
+    public void applyAllZoom(int zoomStatus) {
+        this.applyMainZoom(zoomStatus);
+        this.applyPipZoom(zoomStatus);
+    }
+    public void applyMainZoom(int zoomStatus) {
+        TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+        String[] command = new String[1];
+        command[0] = "zoomMain="+(zoomStatus%2);
+        tv.execute(command);
+    }
+    public void applyPipZoom(int zoomStatus) {
+        TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+        String[] command = new String[1];
+        command[0] = "zoomPip="+(zoomStatus/2);
+        tv.execute(command);
+    }
+    public void updateZoomButtonPosition() {
+        this.swt_zoom_pip.setChecked((this.pipControlActive) ? (this.zoomstate / 2 != 0) : (this.zoomstate % 2 != 0));
+    }
+
+    private void saveData(){
+        writeVolume("Volume.txt");
+        writeBool("standby.txt", this.standby);
+        writeBool("muted.txt", this.muted);
+        writeDataToFile("activeChannel.txt", this.activeChannel);
+        writeBool("pipControl.txt", this.pipControlActive);
+        writeInt("zoomstate.txt", this.zoomstate);
+        this.channels.writeChanges();
+    }
 }
