@@ -37,17 +37,12 @@ import androidx.appcompat.widget.Toolbar;
 public class MainActivity extends AppCompatActivity {
     public static final String MESSAGE_KEY = "";
     private Handler handler;
-    //private ArrayList<Channel> channels;
-    //private ArrayList<Channel> faveChannels;
     private long time = 0;
     private int volume;
     private boolean muted = false;
     private boolean standby = false;
     private String activeChannel;
     private ChannelArray channelArray;
-
-    private int x = 0;
-    private int y = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,12 +52,11 @@ public class MainActivity extends AppCompatActivity {
         this.channelArray = ChannelArray.getInstance();
         this.channelArray.setContext(this);
         this.channelArray.readChannels();
-        //this.faveChannels = getFaveChannels();
         this.volume = readInt("Volume.txt");
-        //this.channels = getChannels("channels");
         this.standby = readInt("standby.txt") != 0;
         this.muted = readInt("muted.txt") != 0;
         this.activeChannel = readString("activeChannel.txt");
+
         //Setting up content view
         setContentView(R.layout.activity_main);
         // Find the toolbar view inside the activity layout
@@ -82,43 +76,11 @@ public class MainActivity extends AppCompatActivity {
         final ListView listView = (ListView) findViewById(R.id.channel_list);
         listView.setAdapter(adapter);
 
-        listView.setOnTouchListener(new AdapterView.OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                MainActivity.this.setX((int)event.getX());
-                MainActivity.this.setY((int)event.getY());
-                return false;
-            }
-
-
-        });
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                /*Log.d("x: ", MainActivity.this.getX() + "");
-                Log.d("y: ", MainActivity.this.getY() + "");
-                if (MainActivity.this.getX() > 1145 && MainActivity.this.getX() < 1285){
-                    Channel channel = channelArray.getChannelAt(position);
-                    if (channelArray.getChannelAtposition).getFavorite()){
-                        channelArray.getChannelAt(position).setFavorite(false);
-                        for (int x = 0; x < faveChannels.size(); x++){
-                            if (faveChannels.get(x).getChannel().equals(channels.get(position).getChannel())) {
-                                faveChannels.remove(x);
-                                continue;
-                            }
-                        }
-
-                    }else{
-                        channels.get(position).setFavorite(true);
-                        faveChannels.add(channels.get(position));
-                    }
-                    ChannelAdapter adap = new ChannelAdapter(MainActivity.this , channels, R.color.light);
-                    listView.setAdapter(adap);
-
-                }else {*/
                     activeChannel = channelArray.getChannelAt(position).getChannel();
                     //SENDER UMSCHALTEN
                     TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
@@ -185,8 +147,12 @@ public class MainActivity extends AppCompatActivity {
                 command[0] = "timeShiftPause=";
                 tv.execute(command);
                 MainActivity.this.setTime(System.currentTimeMillis());
-                String tmp = "" + MainActivity.this.time;
                 //layout muss angepasst werden
+
+                channelArray.writeChanges();
+                Intent changeIntent;
+                changeIntent = new Intent(MainActivity.this, TimeShiftActivity.class);
+                startActivity(changeIntent);
             }
         });
 
@@ -403,36 +369,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void saveFaveChannel(String filename){
-
-    }
-
-    private ArrayList<Channel> getFaveChannels(){
-        ArrayList<Channel> al = new ArrayList<Channel>();
-        boolean cont = true;
-        try {
-            FileInputStream fis = this.openFileInput("faveChannel");
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            while(cont){
-                Channel obj =null;
-                try {
-                    obj = (Channel) ois.readObject();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-                if(obj != null)
-                    al.add(obj);
-                else
-                    cont = false;
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return al;
-    }
 
     // Menu icons are inflated just as they were with actionbar
     @Override
@@ -511,19 +447,4 @@ public class MainActivity extends AppCompatActivity {
     public void setMuted(boolean muted){this.muted = muted;}
     public boolean getMuted(){return this.muted;}
 
-    public void setX(int x){
-        this.x = x;
-    }
-
-    public void setY(int y){
-        this.y = y;
-    }
-
-    public int getX(){
-        return this.x;
-    }
-
-    public int getY(){
-        return this.y;
-    }
 }
