@@ -48,9 +48,10 @@ public class PicInPicActivity extends AppCompatActivity {
     private boolean standby = false;
     private String activeChannel;
     private String activePipChannel;
-
+    private int zoomstate = 0;
     private boolean pipControlActive = true;
 
+    private Switch swt_zoom_pip;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -63,6 +64,7 @@ public class PicInPicActivity extends AppCompatActivity {
         this.muted = readInt("muted.txt") != 0;
         this.activeChannel = readString("activeChannel.txt");
         this.activePipChannel = readString("activePipChannel.txt");
+        this.zoomstate = readInt("zoomstate.txt");
         //Show the PIP-window
         TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
         String[] command = new String[1];
@@ -187,35 +189,23 @@ public class PicInPicActivity extends AppCompatActivity {
 
         //select either mainchannel or PIP-Channel
         Switch PIP_switch = (Switch) findViewById(R.id.swt_toggleControl);
+        PIP_switch.setChecked(this.pipControlActive);
         PIP_switch.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 PicInPicActivity.this.pipControlActive = isChecked;
+                PicInPicActivity.this.updateZoomButtonPosition();
             }
         });
 
         //zoom selected picture
-        final Switch swt_zoom_pip = (Switch)findViewById(R.id.swt_zoom0);
-        final Boolean swt_tmp = PIP_switch.isChecked();
-        swt_zoom_pip.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+        this.swt_zoom_pip = (Switch)findViewById(R.id.swt_zoom0);
+        this.applyAllZoom(this.zoomstate);
+        this.updateZoomButtonPosition();
+        this.swt_zoom_pip.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
-                String[] command = new String[1];
-                if (isChecked && !swt_tmp){
-                    command[0] = "zoomPip=1";
-                }
-                if (isChecked && swt_tmp){
-                    command[0] = "zoomMain=1";
-                }
-                if (!isChecked && swt_tmp){
-                    command[0] = "zoomMain=0";
-                }
-                else {
-                    command[0] = "zoomPip=0";
-                }
-
-                tv.execute(command);
+                setZoomstate(isChecked);
             }
         });
 
@@ -319,7 +309,7 @@ public class PicInPicActivity extends AppCompatActivity {
         writeBool("muted.txt", this.muted);
         writeDataToFile("activeChannel.txt", this.activeChannel);
         writeBool("pipControl.txt", this.pipControlActive);
-
+        writeInt("zoomstate.txt", this.zoomstate);
     }
 
     @Override
@@ -331,6 +321,7 @@ public class PicInPicActivity extends AppCompatActivity {
         writeDataToFile("activeChannel.txt", this.activeChannel);
         writeDataToFile("activePipChannel.txt", this.activePipChannel);
         writeBool("pipControl.txt", this.pipControlActive);
+        writeInt("zoomstate.txt", this.zoomstate);
 
     }
 
@@ -380,8 +371,6 @@ public class PicInPicActivity extends AppCompatActivity {
                 }
                 inputStream.close();
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -404,8 +393,6 @@ public class PicInPicActivity extends AppCompatActivity {
                 }
                 inputStream.close();
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -429,8 +416,6 @@ public class PicInPicActivity extends AppCompatActivity {
             outputStreamWriter.flush();
             outputStreamWriter.write(data);
             outputStreamWriter.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -450,7 +435,6 @@ public class PicInPicActivity extends AppCompatActivity {
         TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
         String[] command = new String[1];
         command[0] ="showPip=0";
-        tv.execute(command);
         Intent changeIntent;
         switch (item.getItemId()) {
             case R.id.button_activate:
@@ -476,25 +460,30 @@ public class PicInPicActivity extends AppCompatActivity {
                 return true;
             case R.id.button_picInPic:
                 //Change to activity_picinpic
+                tv.execute(command);
                 changeIntent = new Intent(this, PicInPicActivity.class);
                 startActivity(changeIntent);
                 return true;
             case R.id.button_homeScreen:
                 //Change to activity_main
+                tv.execute(command);
                 changeIntent = new Intent(this, MainActivity.class);
                 startActivity(changeIntent);
                 return true;
             case R.id.button_favorites:
                 //Change to activity_favorite
+                tv.execute(command);
                 changeIntent = new Intent(this, FavoriteActivity.class);
                 startActivity(changeIntent);
                 return true;
             case R.id.button_settings:
                 //Change to activity_settings
+                tv.execute(command);
                 changeIntent = new Intent(this, SettingsActivity.class);
                 startActivity(changeIntent);
                 return true;
             default:
+                tv.execute(command);
                 return super.onOptionsItemSelected(item);
         }
     }
@@ -513,4 +502,47 @@ public class PicInPicActivity extends AppCompatActivity {
 
     public void setMuted(boolean muted){this.muted = muted;}
     public boolean getMuted(){return this.muted;}
+
+    public void setZoomstate(boolean zoomButtonState) {
+        if(this.pipControlActive) {
+            if(((this.zoomstate & 2) == 0) == zoomButtonState) {
+                toggleZoom();
+            }
+        } else {
+            if(((this.zoomstate & 1) == 0) == zoomButtonState) {
+                toggleZoom();
+            }
+        }
+    }
+
+    public void toggleZoom() {
+        if(this.pipControlActive) {
+            //target is PIP-View
+            this.zoomstate = this.zoomstate ^ 2; // toggles second last digit: 01 => 11, 11 => 01, ...
+            this.applyPipZoom(this.zoomstate);
+        } else {
+            //target is main view
+            this.zoomstate = this.zoomstate ^ 1; // toggles second last digit: 01 => 11, 11 => 01, ...
+            this.applyMainZoom(this.zoomstate);
+        }
+    }
+    public void applyAllZoom(int zoomStatus) {
+        this.applyMainZoom(zoomStatus);
+        this.applyPipZoom(zoomStatus);
+    }
+    public void applyMainZoom(int zoomStatus) {
+        TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+        String[] command = new String[1];
+        command[0] = "zoomMain="+(zoomStatus%2);
+        tv.execute(command);
+    }
+    public void applyPipZoom(int zoomStatus) {
+        TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+        String[] command = new String[1];
+        command[0] = "zoomPip="+(zoomStatus/2);
+        tv.execute(command);
+    }
+    public void updateZoomButtonPosition() {
+        this.swt_zoom_pip.setChecked((this.pipControlActive) ? (this.zoomstate / 2 != 0) : (this.zoomstate % 2 != 0));
+    }
 }
