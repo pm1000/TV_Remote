@@ -15,8 +15,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.Switch;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -90,7 +92,22 @@ public class MainActivity extends AppCompatActivity {
                 }
         });
 
-
+        // seitenverhältnis einstellen hauptbild
+        Switch zoomswitch = (Switch)findViewById(R.id.switch1);
+        zoomswitch.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+                String[] command = new String[1];
+                if (isChecked){
+                    command[0] = "zoomMain=1";
+                }
+                else {
+                    command[0] = "zoomMain=0";
+                }
+                tv.execute(command);
+            }
+        });
 
 
         //sender zappen

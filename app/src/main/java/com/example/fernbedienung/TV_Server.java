@@ -30,7 +30,7 @@ public class TV_Server extends AsyncTask<String, Void, JSONObject> {
     boolean channelScan;
 
     public TV_Server(Context context, Handler handler, boolean channelscan) {
-        this.request = new HttpRequest("192.168.178.61", 1000);;
+        this.request = new HttpRequest("192.168.36.225", 1000);;
         this.context = context;
         this.handler = handler;
         this.channelScan = channelscan;
