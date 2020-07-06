@@ -37,13 +37,14 @@ import androidx.appcompat.widget.Toolbar;
 public class MainActivity extends AppCompatActivity {
     public static final String MESSAGE_KEY = "";
     private Handler handler;
-    private ArrayList<Channel> channels;
-    private ArrayList<Channel> faveChannels;
+    //private ArrayList<Channel> channels;
+    //private ArrayList<Channel> faveChannels;
     private long time = 0;
     private int volume;
     private boolean muted = false;
     private boolean standby = false;
     private String activeChannel;
+    private ChannelArray channelArray;
 
     private int x = 0;
     private int y = 0;
@@ -53,10 +54,12 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
-        this.faveChannels = getFaveChannels();
+        this.channelArray = ChannelArray.getInstance();
+        this.channelArray.setContext(this);
+        this.channelArray.readChannels();
+        //this.faveChannels = getFaveChannels();
         this.volume = readInt("Volume.txt");
-        this.channels = getChannels("channels");
-
+        //this.channels = getChannels("channels");
         this.standby = readInt("standby.txt") != 0;
         this.muted = readInt("muted.txt") != 0;
         this.activeChannel = readString("activeChannel.txt");
@@ -71,10 +74,10 @@ public class MainActivity extends AppCompatActivity {
         // Make sure the toolbar exists in the activity and is not null
         setSupportActionBar(toolbar);
 
-        if(channels.isEmpty()) {
-            channels.add(new Channel("Keine Kanäle vorhanden!\nBitte Kanalscan durchführen!"));
+        if(channelArray.channelsSize() == 0) {
+            channelArray.addChannel(new Channel("Keine Kanäle vorhanden!\nBitte Kanalscan durchführen!"));
         }
-        final ChannelAdapter adapter = new ChannelAdapter(this, channels, R.color.light);
+        final ChannelAdapter adapter = new ChannelAdapter(this, channelArray.getChannels(), R.color.light);
 
         final ListView listView = (ListView) findViewById(R.id.channel_list);
         listView.setAdapter(adapter);
@@ -95,12 +98,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("x: ", MainActivity.this.getX() + "");
+                /*Log.d("x: ", MainActivity.this.getX() + "");
                 Log.d("y: ", MainActivity.this.getY() + "");
                 if (MainActivity.this.getX() > 1145 && MainActivity.this.getX() < 1285){
-                    Channel channel = channels.get(position);
-                    if (channels.get(position).getFavorite()){
-                        channels.get(position).setFavorite(false);
+                    Channel channel = channelArray.getChannelAt(position);
+                    if (channelArray.getChannelAtposition).getFavorite()){
+                        channelArray.getChannelAt(position).setFavorite(false);
                         for (int x = 0; x < faveChannels.size(); x++){
                             if (faveChannels.get(x).getChannel().equals(channels.get(position).getChannel())) {
                                 faveChannels.remove(x);
@@ -115,15 +118,14 @@ public class MainActivity extends AppCompatActivity {
                     ChannelAdapter adap = new ChannelAdapter(MainActivity.this , channels, R.color.light);
                     listView.setAdapter(adap);
 
-                }else {
-                    activeChannel = channels.get(position).getChannel();
+                }else {*/
+                    activeChannel = channelArray.getChannelAt(position).getChannel();
                     //SENDER UMSCHALTEN
                     TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                     String[] command = new String[1];
                     command[0] = "channelMain=" + activeChannel;
                     tv.execute(command);
                 }
-            }
         });
 
 
@@ -136,14 +138,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                 if(activeChannel == "") {
-                    activeChannel = channels.get(0).getChannel();
+                    activeChannel = channelArray.getChannelAt(0).getChannel();
                 } else {
                     int i = 0;
-                    while (i < channels.size() && channels.get(i++).getChannel() != activeChannel);
-                    if(i == channels.size()) {
+                    while (i < channelArray.channelsSize() && channelArray.getChannelAt(i++).getChannel() != activeChannel);
+                    if(i == channelArray.channelsSize()) {
                         i=0;
                     }
-                    activeChannel = channels.get(i).getChannel();
+                    activeChannel = channelArray.getChannelAt(i).getChannel();
                 }
                 String[] command = new String[1];
                 command[0] ="channelMain="+ activeChannel;
@@ -157,14 +159,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                 if(activeChannel == "") {
-                    activeChannel = channels.get(0).getChannel();
+                    activeChannel = channelArray.getChannelAt(0).getChannel();
                 } else {
-                    int i = channels.size()-1;
-                    while (i >= 0 && channels.get(i--).getChannel() != activeChannel);
+                    int i = channelArray.channelsSize()-1;
+                    while (i >= 0 && channelArray.getChannelAt(i--).getChannel() != activeChannel);
                     if(i == -1) {
-                        i=channels.size()-1;
+                        i=channelArray.channelsSize()-1;
                     }
-                    activeChannel = channels.get(i).getChannel();
+                    activeChannel = channelArray.getChannelAt(i).getChannel();
                 }
                 String[] command = new String[1];
                 command[0] ="channelMain="+ activeChannel;
@@ -287,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
         writeBool("standby.txt", this.standby);
         writeBool("muted.txt", this.muted);
         writeDataToFile("activeChannel.txt", this.activeChannel);
-        saveFaveChannel("faveChannel");
+        channelArray.writeChanges();
 
     }
 
@@ -298,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
         writeBool("standby.txt", this.standby);
         writeBool("muted.txt", this.muted);
         writeDataToFile("activeChannel.txt", this.activeChannel);
-        saveFaveChannel("faveChannel");
+        channelArray.writeChanges();
     }
 
     private ArrayList<Channel> getChannels(String filename){
@@ -324,15 +326,6 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-
-        for (int x = 0; x < faveChannels.size(); x++){
-            for (int y = 0; y < al.size(); y++)
-                if (faveChannels.get(x).getChannel().equals(al.get(y).getChannel())){
-                    al.get(y).setFavorite(true);
-                    break;
-                }
-
         }
 
         return al;
@@ -411,18 +404,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveFaveChannel(String filename){
-        try {
-            FileOutputStream fos = openFileOutput(filename, Context.MODE_PRIVATE);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            for (int x = 0; x < this.faveChannels.size(); x++) {
-                oos.writeObject(faveChannels.get(x));
-            }
-            fos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
     }
 
@@ -488,22 +469,25 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.button_picInPic:
                 //Change to activity_picinpic
+                channelArray.writeChanges();
                 changeIntent = new Intent(this, PicInPicActivity.class);
                 startActivity(changeIntent);
                 return true;
             case R.id.button_homeScreen:
                 //Change to activity_main
+                channelArray.writeChanges();
                 changeIntent = new Intent(this, MainActivity.class);
                 startActivity(changeIntent);
                 return true;
             case R.id.button_favorites:
-                saveFaveChannel("faveChannel");
                 //Change to activity_favorite
+                channelArray.writeChanges();
                 changeIntent = new Intent(this, FavoriteActivity.class);
                 startActivity(changeIntent);
                 return true;
             case R.id.button_settings:
                 //Change to activity_settings
+                channelArray.writeChanges();
                 changeIntent = new Intent(this, SettingsActivity.class);
                 startActivity(changeIntent);
                 return true;

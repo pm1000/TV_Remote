@@ -22,6 +22,7 @@ public class ChannelAdapter extends ArrayAdapter<Channel>  {
     private int notFavoriteChannel = R.drawable.star_not_favorite;
     private Activity context;
     private ViewGroup parent;
+    private ChannelArray channelArray = ChannelArray.getInstance();
 
     public ChannelAdapter(Activity context, ArrayList<Channel> channels, int colorResourceID){
         super(context,0, channels);
@@ -30,7 +31,7 @@ public class ChannelAdapter extends ArrayAdapter<Channel>  {
     }
     @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         // Check if the existing view is being reused, otherwise inflate the view
         View listItemView = convertView;
         this.parent = parent;
@@ -52,7 +53,35 @@ public class ChannelAdapter extends ArrayAdapter<Channel>  {
         channelTextView.setText(currentChannel.getName());
 
 
-        ImageView channelImageView = (ImageView) listItemView.findViewById(R.id.favorite_image);
+        final ImageView channelImageView = (ImageView) listItemView.findViewById(R.id.favorite_image);
+
+
+        channelImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int pos = position;
+                int count = -1;
+                if (context.getClass().toString().equals("class com.example.fernbedienung.FavoriteActivity")){
+                    int x = 0;
+                    while (count != pos){
+                        if (channelArray.getChannelAt(x).getFavorite())
+                            count++;
+                        x++;
+                    }
+                    pos = --x;
+                }
+
+                if (channelArray.getChannelAt(pos).getFavorite()){
+                    channelArray.getChannelAt(pos).setFavorite(false);
+                    channelImageView.setImageResource(notFavoriteChannel);
+                }else {
+                    channelArray.getChannelAt(pos).setFavorite(true);
+                    channelImageView.setImageResource(favoriteChannel);
+                }
+
+                updateChannels();
+            }
+        });
 
         if (currentChannel.getFavorite()) {
             channelImageView.setImageResource(favoriteChannel);
@@ -62,9 +91,25 @@ public class ChannelAdapter extends ArrayAdapter<Channel>  {
 
         return listItemView;
     }
-    public void updateChannels(ArrayList<Channel> channels) {
-        this.clear();
-        this.addAll(channels);
+    public void updateChannels() {
+
+        if (context.getClass().toString().equals("class com.example.fernbedienung.FavoriteActivity")) {
+            this.clear();
+            channelArray = ChannelArray.getInstance();
+            ArrayList<Channel> fav = new ArrayList<>();
+            for (Channel c : channelArray.getChannels()) {
+                if (c.getFavorite()) {
+                    fav.add(c);
+                }
+            }
+
+            if (fav.isEmpty()) {
+                fav.add(new Channel("Keine Favoriten vorhanden!"));
+                fav.get(0).setFavorite(true);
+            }
+            this.addAll(fav);
+        }
         this.notifyDataSetChanged();
     }
+
 }
