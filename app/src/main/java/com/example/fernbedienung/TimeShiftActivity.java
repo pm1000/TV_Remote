@@ -88,10 +88,13 @@ public class TimeShiftActivity extends AppCompatActivity {
         spulBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                long timeDifference = System.currentTimeMillis() / 1000;
+                long currentTime = System.currentTimeMillis() / 1000;
+                long diff = currentTime - TimeShiftActivity.this.getTime();
+                long timeInSec = (long) Math.ceil(diff * ((progress) / 100.0));
+
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                 String[] command = new String[1];
-                command[0] = "channelMain=" + activeChannel;
+                command[0] = "timeShiftPlay=" + timeInSec;
                 tv.execute(command);
             }
 
@@ -368,4 +371,8 @@ public class TimeShiftActivity extends AppCompatActivity {
 
     public void setMuted(boolean muted){this.muted = muted;}
     public boolean getMuted(){return this.muted;}
+
+    public long getTime(){
+        return this.time;
+    }
 }
