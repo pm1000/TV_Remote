@@ -167,4 +167,50 @@
         app:layout_constraintTop_toTopOf="@+id/swt_toggleControl"
         app:layout_constraintVertical_bias="0.0" />
 
+    <TextView
+        android:id="@+id/txt_Swt_PIP3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:labelFor="@id/swt_toggleControl"
+        android:text="@string/menu_pip_title"
+        android:textAlignment="textStart"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/swt_toggleControl"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/swt_toggleControl"
+        app:layout_constraintTop_toTopOf="@+id/swt_toggleControl"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Switch
+        android:id="@+id/swt_zoom0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:textAlignment="center"
+        android:textOff="@string/menu_pip_title"
+        android:textOn="Main Screen"
+        app:layout_constraintBottom_toTopOf="@+id/swt_toggleControl"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/guideline4"
+        app:layout_constraintTop_toTopOf="@+id/guideline3"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/txt_zoom_picture"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:labelFor="@id/swt_toggleControl"
+        android:text="Zoom"
+        android:textAlignment="textStart"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/swt_zoom0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/swt_zoom0"
+        app:layout_constraintTop_toTopOf="@+id/swt_zoom0"
+        app:layout_constraintVertical_bias="0.0" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

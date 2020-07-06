@@ -194,6 +194,30 @@ public class PicInPicActivity extends AppCompatActivity {
             }
         });
 
+        //zoom selected picture
+        final Switch swt_zoom_pip = (Switch)findViewById(R.id.swt_zoom0);
+        final Boolean swt_tmp = PIP_switch.isChecked();
+        swt_zoom_pip.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+                String[] command = new String[1];
+                if (isChecked && !swt_tmp){
+                    command[0] = "zoomPip=1";
+                }
+                if (isChecked && swt_tmp){
+                    command[0] = "zoomMain=1";
+                }
+                if (!isChecked && swt_tmp){
+                    command[0] = "zoomMain=0";
+                }
+                else {
+                    command[0] = "zoomPip=0";
+                }
+
+                tv.execute(command);
+            }
+        });
 
         //volume bar
         final SeekBar volSeekBar = (SeekBar) findViewById(R.id.volumeSeekBar);
