@@ -140,4 +140,15 @@
         app:layout_constraintStart_toEndOf="@+id/btn_volume_mute"
         app:layout_constraintTop_toTopOf="@+id/guideline2" />
 
+    <Switch
+        android:id="@+id/switch1"
+        android:layout_width="111dp"
+        android:layout_height="22dp"
+        android:text=" Zoom"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btn_pause"
+        app:layout_constraintHorizontal_bias="0.246"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline3" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
