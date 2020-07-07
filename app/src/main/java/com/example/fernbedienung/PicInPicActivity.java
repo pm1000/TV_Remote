@@ -58,6 +58,7 @@ public class PicInPicActivity extends AppCompatActivity {
         this.activeChannel = readString("activeChannel.txt");
         this.activePipChannel = readString("activePipChannel.txt");
         this.zoomstate = readInt("zoomstate.txt");
+
         //Show the PIP-window
         TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
         String[] command = new String[1];
@@ -107,7 +108,7 @@ public class PicInPicActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(PicInPicActivity.this.pipControlActive) {
+                if(!PicInPicActivity.this.pipControlActive) {
                     PicInPicActivity.this.activeChannel = PicInPicActivity.this.channels.get(position).getChannel();
                 } else {
                     PicInPicActivity.this.activePipChannel = PicInPicActivity.this.channels.get(position).getChannel();
@@ -130,7 +131,7 @@ public class PicInPicActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
-                if(PicInPicActivity.this.pipControlActive) {
+                if(!PicInPicActivity.this.pipControlActive) {
                     if (PicInPicActivity.this.activeChannel == "") {
                         PicInPicActivity.this.activeChannel = PicInPicActivity.this.channels.get(0).getChannel();
                     } else {
@@ -170,12 +171,14 @@ public class PicInPicActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
-                if(PicInPicActivity.this.pipControlActive) {
+                if(!PicInPicActivity.this.pipControlActive) {
                     if (PicInPicActivity.this.activeChannel.isEmpty()) {
                         PicInPicActivity.this.activeChannel = PicInPicActivity.this.channels.get(0).getChannel();
                     } else {
                         int i = PicInPicActivity.this.channels.size();
-                        while (i >= 0 && PicInPicActivity.this.channels.get(i--).getChannel() != activeChannel);
+                        while (i >= 0 && PicInPicActivity.this.channels.get(i).getChannel().equals(activeChannel)) {
+                            i--;
+                        }
                         if (i == -1) {
                             i = PicInPicActivity.this.channels.size()-1;
                         }
@@ -186,7 +189,9 @@ public class PicInPicActivity extends AppCompatActivity {
                         PicInPicActivity.this.activePipChannel = PicInPicActivity.this.channels.get(0).getChannel();
                     } else {
                         int i = PicInPicActivity.this.channels.size();
-                        while (i >= 0 && PicInPicActivity.this.channels.get(i--).getChannel() != PicInPicActivity.this.activePipChannel);
+                        while (i >= 0 && PicInPicActivity.this.channels.get(i).getChannel().equals(PicInPicActivity.this.activePipChannel)) {
+                            i--;
+                        }
                         if (i == -1) {
                             i = PicInPicActivity.this.channels.size()-1;
                         }
@@ -195,7 +200,7 @@ public class PicInPicActivity extends AppCompatActivity {
                 }
                 String[] command = new String[1];
                 if(PicInPicActivity.this.pipControlActive) {
-                    command[0] ="channelPip="+ PicInPicActivity.this.activeChannel;
+                    command[0] = "channelPip="+ PicInPicActivity.this.activePipChannel;
                 } else {
                     command[0] = "channelMain=" + PicInPicActivity.this.activeChannel;
                 }
@@ -327,7 +332,6 @@ public class PicInPicActivity extends AppCompatActivity {
                     cont = false;
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -535,6 +539,7 @@ public class PicInPicActivity extends AppCompatActivity {
         writeBool("standby.txt", this.standby);
         writeBool("muted.txt", this.muted);
         writeDataToFile("activeChannel.txt", this.activeChannel);
+        writeDataToFile("activePipChannel.txt", this.activePipChannel);
         writeBool("pipControl.txt", this.pipControlActive);
         writeInt("zoomstate.txt", this.zoomstate);
         this.channels.writeChanges();

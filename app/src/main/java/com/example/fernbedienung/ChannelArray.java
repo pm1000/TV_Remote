@@ -12,7 +12,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 public class ChannelArray {
-    private ArrayList<Channel> channels = new ArrayList<Channel>();
+    private ArrayList<Channel> channels;
     private static ChannelArray Instance = null;
     private Activity context = null;
 
