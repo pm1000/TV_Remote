@@ -109,7 +109,7 @@ public class HttpRequest{
             throws IOException, JSONException, IllegalArgumentException {
         if (ipAddress == null || ipAddress.isEmpty())
             throw new IllegalArgumentException("IP address is undefined " + parameters);
-        URL url = new URL("http", ipAddress, 80, "tv?" + parameters);
+        URL url = new URL("http", ipAddress, 8080, "tv?" + parameters);
 
         // to be done:
         // uncomment the following test output if required and watch window "6: Android"
