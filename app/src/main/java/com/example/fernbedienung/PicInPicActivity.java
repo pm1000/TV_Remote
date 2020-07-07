@@ -34,7 +34,6 @@ import androidx.appcompat.widget.Toolbar;
 public class PicInPicActivity extends AppCompatActivity {
     public static final String MESSAGE_KEY = "";
     private Handler handler;
-    private ArrayList<Channel> channels;
     private long time = 0;
     private int volume;
     private boolean muted = false;
@@ -43,6 +42,7 @@ public class PicInPicActivity extends AppCompatActivity {
     private String activePipChannel;
     private int zoomstate = 0;
     private boolean pipControlActive = true;
+    private ChannelArray channels;
 
     private Switch swt_zoom_pip;
     @Override
@@ -50,8 +50,8 @@ public class PicInPicActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
+        this.channels = ChannelArray.getInstance();
         this.volume = readInt("Volume.txt");
-        this.channels = getChannels("channels");
         this.pipControlActive = readInt("pipControl.txt") != 0;
         this.standby = readInt("standby.txt") != 0;
         this.muted = readInt("muted.txt") != 0;
@@ -63,6 +63,7 @@ public class PicInPicActivity extends AppCompatActivity {
         String[] command = new String[1];
         command[0] ="showPip=1";
         tv.execute(command);
+
         //Setting up content view
         setContentView(R.layout.activity_picinpic);
         // Find the toolbar view inside the activity layout
@@ -74,10 +75,10 @@ public class PicInPicActivity extends AppCompatActivity {
         // Make sure the toolbar exists in the activity and is not null
         setSupportActionBar(toolbar);
 
-        if(channels.isEmpty()) {
-            channels.add(new Channel("Keine Kanäle vorhanden!\nBitte Kanalscan durchführen!"));
+        if(channels.getChannels().isEmpty()) {
+            channels.addChannel(new Channel("Keine Kanäle vorhanden!\nBitte Kanalscan durchführen!"));
         }
-        ChannelAdapter adapter = new ChannelAdapter(this, channels, R.color.light);
+        ChannelAdapter adapter = new ChannelAdapter(this, channels.getChannels(), R.color.light);
 
         //select either mainchannel or PIP-Channel
         Switch PIP_switch = (Switch) findViewById(R.id.swt_toggleControl);
@@ -297,25 +298,13 @@ public class PicInPicActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        writeVolume("Volume.txt");
-        writeBool("standby.txt", this.standby);
-        writeBool("muted.txt", this.muted);
-        writeDataToFile("activeChannel.txt", this.activeChannel);
-        writeBool("pipControl.txt", this.pipControlActive);
-        writeInt("zoomstate.txt", this.zoomstate);
+        saveData();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        writeVolume("Volume.txt");
-        writeBool("standby.txt", this.standby);
-        writeBool("muted.txt", this.muted);
-        writeDataToFile("activeChannel.txt", this.activeChannel);
-        writeDataToFile("activePipChannel.txt", this.activePipChannel);
-        writeBool("pipControl.txt", this.pipControlActive);
-        writeInt("zoomstate.txt", this.zoomstate);
-
+        saveData();
     }
 
     private ArrayList<Channel> getChannels(String filename){
@@ -450,29 +439,34 @@ public class PicInPicActivity extends AppCompatActivity {
                 return true;
             case R.id.button_picInPic:
                 //Change to activity_picinpic
+                saveData();
                 tv.execute(command);
                 changeIntent = new Intent(this, PicInPicActivity.class);
                 startActivity(changeIntent);
                 return true;
             case R.id.button_homeScreen:
                 //Change to activity_main
+                saveData();
                 tv.execute(command);
                 changeIntent = new Intent(this, MainActivity.class);
                 startActivity(changeIntent);
                 return true;
             case R.id.button_favorites:
                 //Change to activity_favorite
+                saveData();
                 tv.execute(command);
                 changeIntent = new Intent(this, FavoriteActivity.class);
                 startActivity(changeIntent);
                 return true;
             case R.id.button_settings:
                 //Change to activity_settings
+                saveData();
                 tv.execute(command);
                 changeIntent = new Intent(this, SettingsActivity.class);
                 startActivity(changeIntent);
                 return true;
             default:
+                saveData();
                 tv.execute(command);
                 return super.onOptionsItemSelected(item);
         }
@@ -534,5 +528,15 @@ public class PicInPicActivity extends AppCompatActivity {
     }
     public void updateZoomButtonPosition() {
         this.swt_zoom_pip.setChecked((this.pipControlActive) ? (this.zoomstate / 2 != 0) : (this.zoomstate % 2 != 0));
+    }
+
+    private void saveData(){
+        writeVolume("Volume.txt");
+        writeBool("standby.txt", this.standby);
+        writeBool("muted.txt", this.muted);
+        writeDataToFile("activeChannel.txt", this.activeChannel);
+        writeBool("pipControl.txt", this.pipControlActive);
+        writeInt("zoomstate.txt", this.zoomstate);
+        this.channels.writeChanges();
     }
 }

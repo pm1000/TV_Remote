@@ -63,6 +63,7 @@ public class FavoriteActivity extends AppCompatActivity {
         this.standby = readInt("standby.txt") != 0;
         this.muted = readInt("muted.txt") != 0;
         this.activeChannel = readString("activeChannel.txt");
+
         //Setting up content view
         setContentView(R.layout.activity_favorite);
         // Find the toolbar view inside the activity layout
@@ -100,8 +101,6 @@ public class FavoriteActivity extends AppCompatActivity {
             }
 
         });
-
-
 
 
         //sender zappen
@@ -147,8 +146,7 @@ public class FavoriteActivity extends AppCompatActivity {
             }
         });
 
-        //timeshift
-        Button pauseBtn = (Button) findViewById(R.id.btn_pause);
+        Button pauseBtn = (Button) findViewById(R.id.btn_play);
         pauseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -158,8 +156,12 @@ public class FavoriteActivity extends AppCompatActivity {
                 command[0] = "timeShiftPause=";
                 tv.execute(command);
                 FavoriteActivity.this.setTime(System.currentTimeMillis());
-                String tmp = "" + FavoriteActivity.this.time;
                 //layout muss angepasst werden
+
+                channelArray.writeChanges();
+                Intent changeIntent;
+                changeIntent = new Intent(FavoriteActivity.this, TimeShiftActivity.class);
+                startActivity(changeIntent);
             }
         });
 
@@ -260,48 +262,13 @@ public class FavoriteActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        writeVolume("Volume.txt");
-        writeBool("standby.txt", this.standby);
-        writeBool("muted.txt", this.muted);
-        writeDataToFile("activeChannel.txt", this.activeChannel);
-        channelArray.writeChanges();
+        saveData();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        writeVolume("Volume.txt");
-        writeBool("standby.txt", this.standby);
-        writeBool("muted.txt", this.muted);
-        writeDataToFile("activeChannel.txt", this.activeChannel);
-        channelArray.writeChanges();
-    }
-
-    private ArrayList<Channel> getFaveChannels(){
-        ArrayList<Channel> al = new ArrayList<Channel>();
-        boolean cont = true;
-        try {
-            FileInputStream fis = this.openFileInput("faveChannel");
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            while(cont){
-                Channel obj =null;
-                try {
-                    obj = (Channel) ois.readObject();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-                if(obj != null)
-                    al.add(obj);
-                else
-                    cont = false;
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return al;
+        saveData();
     }
 
 
@@ -412,25 +379,25 @@ public class FavoriteActivity extends AppCompatActivity {
                 return true;
             case R.id.button_picInPic:
                 //Change to activity_picinpic
-                channelArray.writeChanges();
+                saveData();
                 changeIntent = new Intent(this, PicInPicActivity.class);
                 startActivity(changeIntent);
                 return true;
             case R.id.button_homeScreen:
                 //Change to activity_main
-                channelArray.writeChanges();
+                saveData();
                 changeIntent = new Intent(this, MainActivity.class);
                 startActivity(changeIntent);
                 return true;
             case R.id.button_favorites:
                 //Change to activity_favorite
-                channelArray.writeChanges();
+                saveData();
                 changeIntent = new Intent(this, FavoriteActivity.class);
                 startActivity(changeIntent);
                 return true;
             case R.id.button_settings:
                 //Change to activity_settings
-                channelArray.writeChanges();
+                saveData();
                 changeIntent = new Intent(this, SettingsActivity.class);
                 startActivity(changeIntent);
                 return true;
@@ -454,4 +421,11 @@ public class FavoriteActivity extends AppCompatActivity {
     public void setMuted(boolean muted){this.muted = muted;}
     public boolean getMuted(){return this.muted;}
 
+    private void saveData(){
+        writeVolume("Volume.txt");
+        writeBool("standby.txt", this.standby);
+        writeBool("muted.txt", this.muted);
+        writeDataToFile("activeChannel.txt", this.activeChannel);
+        channelArray.writeChanges();
+    }
 }

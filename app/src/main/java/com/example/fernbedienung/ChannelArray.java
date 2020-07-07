@@ -78,9 +78,16 @@ public class ChannelArray {
     public int channelsSize(){
         return channels.size();
     }
+    public int size(){
+        return channels.size();
+    }
 
     public Channel getChannelAt(int index){
         return channels.get(index);
+    }
+
+    public Channel get(int index){
+        return this.getChannelAt(index);
     }
 
     public void addChannel(Channel channel){

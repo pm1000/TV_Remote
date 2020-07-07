@@ -1,9 +1,11 @@
 package com.example.fernbedienung;
 
+import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -23,17 +25,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.sql.Time;
 
 public class TimeShiftActivity extends AppCompatActivity {
 
     public static final String MESSAGE_KEY = "";
     private Handler handler;
     private long time;
+    private long currentPlayTime = 0;
     private int volume;
     private boolean muted = false;
     private boolean standby = false;
     private String activeChannel;
     private ChannelArray channelArray;
+    private Activity context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,14 +93,17 @@ public class TimeShiftActivity extends AppCompatActivity {
         spulBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                long currentTime = System.currentTimeMillis() / 1000;
-                long diff = currentTime - TimeShiftActivity.this.getTime();
-                long timeInSec = (long) Math.ceil(diff * ((progress) / 100.0));
+                if (fromUser) {
+                    long currentTime = System.currentTimeMillis() / 1000;
+                    long diff = currentTime - TimeShiftActivity.this.getTime();
+                    long timeInSec = (long) Math.floor(diff * ((progress) / 100.0));
 
-                TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
-                String[] command = new String[1];
-                command[0] = "timeShiftPlay=" + timeInSec;
-                tv.execute(command);
+                    TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+                    String[] command = new String[1];
+                    command[0] = "timeShiftPlay=" + timeInSec;
+                    tv.execute(command);
+                    TimeShiftActivity.this.setCurrentPlayTime(timeInSec);
+                }
             }
 
             @Override
@@ -117,11 +125,13 @@ public class TimeShiftActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
-                    TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
-                    String[] command = new String[1];
-                    command[0] = "volume=" + progress;
-                    tv.execute(command);
-                    TimeShiftActivity.this.setVolume(progress);
+                    if (progress != 0) {
+                        TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+                        String[] command = new String[1];
+                        command[0] = "volume=" + progress;
+                        tv.execute(command);
+                        TimeShiftActivity.this.setVolume(progress);
+                    }
                 }
             }
 
@@ -135,6 +145,45 @@ public class TimeShiftActivity extends AppCompatActivity {
 
             }
         });
+
+        //timedown
+        Button timedown = (Button) findViewById(R.id.btn_rewind);
+        timedown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                long playTime = TimeShiftActivity.this.getCurrentPlayTime();
+                if (playTime > 1) {
+                        playTime = playTime - 1;
+                }
+
+                TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+                String[] command = new String[1];
+                command[0] = "timeShiftPlay=" + playTime;
+                tv.execute(command);
+                TimeShiftActivity.this.setCurrentPlayTime(playTime);
+            }
+        });
+
+        //timeup
+        Button timeup = (Button) findViewById(R.id.btn_forward);
+        timeup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                long playTime = TimeShiftActivity.this.getCurrentPlayTime();
+                long diff = System.currentTimeMillis() / 1000 - TimeShiftActivity.this.getTime();
+                if (playTime < diff) {
+                    playTime = playTime + 1;
+                }
+
+                TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+                String[] command = new String[1];
+                command[0] = "timeShiftPlay=" + playTime;
+                tv.execute(command);
+                TimeShiftActivity.this.setCurrentPlayTime(playTime);
+            }
+        });
+
+
 
         //volume up
         Button upVolButton = (Button) findViewById(R.id.btn_volume_up);
@@ -174,6 +223,24 @@ public class TimeShiftActivity extends AppCompatActivity {
             }
         });
 
+        //play
+        Button play = (Button) findViewById(R.id.btn_play);
+        play.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+                String[] command = new String[1];
+                command[0] = "timeShiftPlay=0";
+                tv.execute(command);
+                Intent changeIntent;
+                if (context.getClass().toString().equals("class com.example.fernbedienung.FavoriteActivity"))
+                        changeIntent = new Intent(TimeShiftActivity.this, FavoriteActivity.class);
+                    else
+                        changeIntent = new Intent(TimeShiftActivity.this, MainActivity.class);
+                startActivity(changeIntent);
+            }
+        });
+
         //mute
         Button muteBtn = (Button) findViewById(R.id.btn_volume_mute);
         muteBtn.setOnClickListener(new View.OnClickListener() {
@@ -197,6 +264,10 @@ public class TimeShiftActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    public void setContext(Activity con){
+        this.context = con;
     }
 
 
@@ -374,5 +445,13 @@ public class TimeShiftActivity extends AppCompatActivity {
 
     public long getTime(){
         return this.time;
+    }
+
+    public long getCurrentPlayTime(){
+        return this.getCurrentPlayTime();
+    }
+
+    public void setCurrentPlayTime(long time){
+        this.currentPlayTime = time;
     }
 }
