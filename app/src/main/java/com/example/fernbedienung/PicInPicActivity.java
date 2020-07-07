@@ -86,6 +86,28 @@ public class PicInPicActivity extends AppCompatActivity {
         }
         ChannelAdapter adapter = new ChannelAdapter(this, channels, R.color.light);
 
+        //select either mainchannel or PIP-Channel
+        Switch PIP_switch = (Switch) findViewById(R.id.swt_toggleControl);
+        PIP_switch.setChecked(this.pipControlActive);
+        PIP_switch.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                PicInPicActivity.this.pipControlActive = isChecked;
+                PicInPicActivity.this.updateZoomButtonPosition();
+            }
+        });
+
+        //zoom selected picture
+        this.swt_zoom_pip = (Switch)findViewById(R.id.swt_zoom0);
+        this.applyAllZoom(this.zoomstate);
+        this.updateZoomButtonPosition();
+        this.swt_zoom_pip.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                setZoomstate(isChecked);
+            }
+        });
+
         final ListView listView = (ListView) findViewById(R.id.channel_list);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -187,27 +209,6 @@ public class PicInPicActivity extends AppCompatActivity {
             }
         });
 
-        //select either mainchannel or PIP-Channel
-        Switch PIP_switch = (Switch) findViewById(R.id.swt_toggleControl);
-        PIP_switch.setChecked(this.pipControlActive);
-        PIP_switch.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                PicInPicActivity.this.pipControlActive = isChecked;
-                PicInPicActivity.this.updateZoomButtonPosition();
-            }
-        });
-
-        //zoom selected picture
-        this.swt_zoom_pip = (Switch)findViewById(R.id.swt_zoom0);
-        this.applyAllZoom(this.zoomstate);
-        this.updateZoomButtonPosition();
-        this.swt_zoom_pip.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                setZoomstate(isChecked);
-            }
-        });
 
         //volume bar
         final SeekBar volSeekBar = (SeekBar) findViewById(R.id.volumeSeekBar);
