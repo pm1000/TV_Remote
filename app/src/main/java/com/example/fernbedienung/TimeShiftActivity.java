@@ -165,7 +165,7 @@ public class TimeShiftActivity extends AppCompatActivity {
                 long startTime = TimeShiftActivity.this.getTime();
                 long currTime = System.currentTimeMillis() / 1000;
                 double diff = currTime - startTime;
-                int timePrOgress = (int) Math.ceil(playTime / diff);
+                int timePrOgress = (int) Math.ceil((playTime / diff) * 100);
                 spulBar.setProgress(timePrOgress);
             }
         });
@@ -186,6 +186,12 @@ public class TimeShiftActivity extends AppCompatActivity {
                 command[0] = "timeShiftPlay=" + playTime;
                 tv.execute(command);
                 TimeShiftActivity.this.setCurrentPlayTime(playTime);
+
+                long startTime = TimeShiftActivity.this.getTime();
+                long currTime = System.currentTimeMillis() / 1000;
+                double difference = currTime - startTime;
+                int timePrOgress = (int) Math.ceil((playTime / difference) * 100);
+                spulBar.setProgress(timePrOgress);
             }
         });
 
