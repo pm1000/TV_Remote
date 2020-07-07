@@ -70,6 +70,12 @@ public class MainActivity extends AppCompatActivity {
         // Make sure the toolbar exists in the activity and is not null
         setSupportActionBar(toolbar);
 
+        //volume im tv-server setzen (zum start)
+        TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
+        String[] command = new String[1];
+        command[0] = "volume=" + this.volume;
+        tv.execute(command);
+
         if(channelArray.channelsSize() == 0) {
             channelArray.addChannel(new Channel("Keine Kanäle vorhanden!\nBitte Kanalscan durchführen!"));
         }
@@ -169,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
                 channelArray.writeChanges();
                 Intent changeIntent;
                 changeIntent = new Intent(MainActivity.this, TimeShiftActivity.class);
+
                 startActivity(changeIntent);
             }
         });

@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -37,6 +38,7 @@ public class TimeShiftActivity extends AppCompatActivity {
     private boolean standby = false;
     private String activeChannel;
     private ChannelArray channelArray;
+    private Activity context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -231,7 +233,10 @@ public class TimeShiftActivity extends AppCompatActivity {
                 command[0] = "timeShiftPlay=0";
                 tv.execute(command);
                 Intent changeIntent;
-                changeIntent = new Intent(TimeShiftActivity.this, MainActivity.class);
+                if (context.getClass().toString().equals("class com.example.fernbedienung.FavoriteActivity"))
+                        changeIntent = new Intent(TimeShiftActivity.this, FavoriteActivity.class);
+                    else
+                        changeIntent = new Intent(TimeShiftActivity.this, MainActivity.class);
                 startActivity(changeIntent);
             }
         });
@@ -259,6 +264,10 @@ public class TimeShiftActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    public void setContext(Activity con){
+        this.context = con;
     }
 
 
