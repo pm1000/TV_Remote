@@ -8,8 +8,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,7 +17,6 @@ import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.Switch;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -33,10 +30,6 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 import androidx.appcompat.widget.Toolbar;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class PicInPicActivity extends AppCompatActivity {
     public static final String MESSAGE_KEY = "";
@@ -114,17 +107,17 @@ public class PicInPicActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if(PicInPicActivity.this.pipControlActive) {
-                    activeChannel = channels.get(position).getChannel();
+                    PicInPicActivity.this.activeChannel = PicInPicActivity.this.channels.get(position).getChannel();
                 } else {
-                    activePipChannel = channels.get(position).getChannel();
+                    PicInPicActivity.this.activePipChannel = PicInPicActivity.this.channels.get(position).getChannel();
                 }
                 //SENDER UMSCHALTEN
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                 String[] command = new String[1];
                 if(PicInPicActivity.this.pipControlActive) {
-                    command[0] ="channelPip="+ activePipChannel;
+                    command[0] ="channelPip="+ PicInPicActivity.this.activePipChannel;
                 } else {
-                    command[0] = "channelMain=" + activeChannel;
+                    command[0] = "channelMain=" + PicInPicActivity.this.activeChannel;
                 }
                 tv.execute(command);
             }
@@ -137,35 +130,35 @@ public class PicInPicActivity extends AppCompatActivity {
             public void onClick(View v) {
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                 if(PicInPicActivity.this.pipControlActive) {
-                    if (activeChannel == "") {
-                        activeChannel = channels.get(0).getChannel();
+                    if (PicInPicActivity.this.activeChannel == "") {
+                        PicInPicActivity.this.activeChannel = PicInPicActivity.this.channels.get(0).getChannel();
                     } else {
                         int i = 0;
-                        while (i < channels.size() && channels.get(i++).getChannel() != activeChannel)
+                        while (i < PicInPicActivity.this.channels.size() && PicInPicActivity.this.channels.get(i++).getChannel() != PicInPicActivity.this.activeChannel)
                             ;
-                        if (i == channels.size()) {
+                        if (i == PicInPicActivity.this.channels.size()) {
                             i = 0;
                         }
-                        activeChannel = channels.get(i).getChannel();
+                        PicInPicActivity.this.activeChannel = PicInPicActivity.this.channels.get(i).getChannel();
                     }
                 } else {
-                    if (activePipChannel == "") {
-                        activePipChannel = channels.get(0).getChannel();
+                    if (PicInPicActivity.this.activePipChannel == "") {
+                        PicInPicActivity.this.activePipChannel = PicInPicActivity.this.channels.get(0).getChannel();
                     } else {
                         int i = 0;
-                        while (i < channels.size() && channels.get(i++).getChannel() != activePipChannel)
+                        while (i < PicInPicActivity.this.channels.size() && PicInPicActivity.this.channels.get(i++).getChannel() != PicInPicActivity.this.activePipChannel)
                             ;
-                        if (i == channels.size()) {
+                        if (i == PicInPicActivity.this.channels.size()) {
                             i = 0;
                         }
-                        activePipChannel = channels.get(i).getChannel();
+                        PicInPicActivity.this.activePipChannel = PicInPicActivity.this.channels.get(i).getChannel();
                     }
                 }
                 String[] command = new String[1];
                 if(PicInPicActivity.this.pipControlActive) {
-                    command[0] ="channelPip="+ activePipChannel;
+                    command[0] ="channelPip="+ PicInPicActivity.this.activePipChannel;
                 } else {
-                    command[0] = "channelMain=" + activeChannel;
+                    command[0] = "channelMain=" + PicInPicActivity.this.activeChannel;
                 }
                 tv.execute(command);
             }
@@ -177,33 +170,33 @@ public class PicInPicActivity extends AppCompatActivity {
             public void onClick(View v) {
                 TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                 if(PicInPicActivity.this.pipControlActive) {
-                    if (activeChannel == "") {
-                        activeChannel = channels.get(0).getChannel();
+                    if (PicInPicActivity.this.activeChannel.isEmpty()) {
+                        PicInPicActivity.this.activeChannel = PicInPicActivity.this.channels.get(0).getChannel();
                     } else {
-                        int i = channels.size();
-                        while (i >= 0 && channels.get(i--).getChannel() != activeChannel);
+                        int i = PicInPicActivity.this.channels.size();
+                        while (i >= 0 && PicInPicActivity.this.channels.get(i--).getChannel() != activeChannel);
                         if (i == -1) {
-                            i = channels.size()-1;
+                            i = PicInPicActivity.this.channels.size()-1;
                         }
-                        activeChannel = channels.get(i).getChannel();
+                        PicInPicActivity.this.activeChannel = PicInPicActivity.this.channels.get(i).getChannel();
                     }
                 } else {
-                    if (activePipChannel == "") {
-                        activePipChannel = channels.get(0).getChannel();
+                    if (PicInPicActivity.this.activePipChannel.isEmpty()) {
+                        PicInPicActivity.this.activePipChannel = PicInPicActivity.this.channels.get(0).getChannel();
                     } else {
-                        int i = channels.size();
-                        while (i >= 0 && channels.get(i--).getChannel() != activePipChannel);
+                        int i = PicInPicActivity.this.channels.size();
+                        while (i >= 0 && PicInPicActivity.this.channels.get(i--).getChannel() != PicInPicActivity.this.activePipChannel);
                         if (i == -1) {
-                            i = channels.size()-1;
+                            i = PicInPicActivity.this.channels.size()-1;
                         }
-                        activePipChannel = channels.get(i).getChannel();
+                        PicInPicActivity.this.activePipChannel = PicInPicActivity.this.channels.get(i).getChannel();
                     }
                 }
                 String[] command = new String[1];
                 if(PicInPicActivity.this.pipControlActive) {
-                    command[0] ="channelPip="+ activeChannel;
+                    command[0] ="channelPip="+ PicInPicActivity.this.activeChannel;
                 } else {
-                    command[0] = "channelMain=" + activeChannel;
+                    command[0] = "channelMain=" + PicInPicActivity.this.activeChannel;
                 }
                 tv.execute(command);
             }
@@ -247,8 +240,9 @@ public class PicInPicActivity extends AppCompatActivity {
                 int newVolume;
                 if (PicInPicActivity.this.getVolume() < 100){
                     newVolume = PicInPicActivity.this.getVolume() + 1;
-                }else
+                } else {
                     newVolume = 100;
+                }
                 command[0] = "volume=" + newVolume ;
                 tv.execute(command);
                 PicInPicActivity.this.setVolume(newVolume);
@@ -266,8 +260,9 @@ public class PicInPicActivity extends AppCompatActivity {
                 int newVolume;
                 if (PicInPicActivity.this.getVolume() > 0){
                     newVolume = PicInPicActivity.this.getVolume() - 1;
-                }else
+                } else {
                     newVolume = 0;
+                }
                 command[0] = "volume=" + newVolume ;
                 tv.execute(command);
                 PicInPicActivity.this.setVolume(newVolume);
@@ -287,8 +282,7 @@ public class PicInPicActivity extends AppCompatActivity {
                     tv.execute(command);
                     PicInPicActivity.this.setMuted(false);
                     volSeekBar.setProgress(PicInPicActivity.this.getVolume());
-                }else
-                {
+                } else {
                     TV_Server tv = new TV_Server(getApplicationContext(), handler, false);
                     String[] command = new String[1];
                     command[0] = "volume=0";
@@ -298,8 +292,6 @@ public class PicInPicActivity extends AppCompatActivity {
                 }
             }
         });
-
-
     }
 
     @Override
@@ -334,7 +326,7 @@ public class PicInPicActivity extends AppCompatActivity {
             FileInputStream fis = this.openFileInput("channels");
             ObjectInputStream ois = new ObjectInputStream(fis);
             while(cont){
-                Channel obj =null;
+                Channel obj = null;
                 try {
                     obj = (Channel) ois.readObject();
                 } catch (ClassNotFoundException e) {
@@ -345,9 +337,6 @@ public class PicInPicActivity extends AppCompatActivity {
                 else
                     cont = false;
             }
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
